@@ -5,25 +5,27 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 
+
 namespace Chess.Entities.Figures
 {
     public class FigureBase<TFigure> : IFigure where TFigure : IFigure
     {
-        protected Position _position;
-        protected Color _color;
+        protected Enums.Color _color;
         protected Image _element;
         protected string _pngPath;
         protected TFigure _figureType;
+        protected bool _isReadyToMove;
 
-        public FigureBase(Position position, Color color)
+        public bool IsReadyToMove { get => _isReadyToMove; set => _isReadyToMove = value; }
+
+        public FigureBase(Enums.Color color)
         {
-            _position = position;
             _color = color;
             _pngPath = GetPath(GetFigureName(), GetColor());
             _element = new Image();
         }
 
-        public Color GetColor()
+        public Enums.Color GetColor()
         {
             return _color;
         }
@@ -38,12 +40,7 @@ namespace Chess.Entities.Figures
             return _element;
         }
 
-        public string GetPngPath()=> GetPath(GetFigureName(), GetColor());
-
-        public Position GetPosition()
-        {
-            return _position;
-        }
+        public string GetPngPath() => GetPath(GetFigureName(), GetColor());
 
         public void Initialize()
         {
@@ -57,36 +54,17 @@ namespace Chess.Entities.Figures
             }
         }
 
-        public bool IsAttackPossible(Position newPosition)
-        {
-            return true;
-        }
-
-        public bool IsMovePossible(Position newPosition)
-        {
-            return true;
-        }
-
-        public void Move(Position newPosition)
+        public virtual void Move(Position newPosition, Position currentPosition)
         {   
+
         }
 
-        public void Move(Position newPosition, IFigure killingFigure)
-        {
-            
-        }
-
-        public void SetColor(Color color)
+        public void SetColor(Enums.Color color)
         {
             _color = color;
         }
 
-        public void SetPosition(Position position)
-        {
-            _position = position;
-        }
-
-        protected string GetPath(string FigureName,Color color)
+        protected string GetPath(string FigureName,Enums.Color color)
         {
             string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -99,13 +77,18 @@ namespace Chess.Entities.Figures
                 .FullName;
 
 
-            string imagesDirectory = Path.Combine(projectDirectory, "PNGs", "FigurePNGs");
+            string imagesDirectory = System.IO.Path.Combine(projectDirectory, "PNGs", "FigurePNGs");
 
             string FigurePng = $"{FigureName}{color}.png";
 
-            string imagePath = Path.Combine(imagesDirectory, $"{FigurePng}");
+            string imagePath = System.IO.Path.Combine(imagesDirectory, $"{FigurePng}");
 
             return imagePath;
+        }
+
+        public List<BoardBlock> MovableBlocks(Grid boardGrid, VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation, int boardSize)
+        {
+            throw new NotImplementedException();
         }
     }
 }

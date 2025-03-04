@@ -1,10 +1,11 @@
 ﻿using Chess.Enums;
+using Chess.Interfaces;
 
 namespace Chess.Entities.Figures
 {
     public class Rook : FigureBase<Rook>
     {
-        public Rook(Position position, Color color) : base(position, color)
+        public Rook(Color color) : base(color)
         {
 
         }

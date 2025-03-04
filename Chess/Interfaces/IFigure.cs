@@ -1,34 +1,21 @@
 ﻿using Chess.Entities;
 using Chess.Enums;
 using System.Windows.Controls;
+using System.Windows.Shapes;
 namespace Chess.Interfaces
 {
     public interface IFigure
     {
-        protected const string FigureImagesDirectory = @"PNGs\FigurePNGs\";
+        //protected const string FIGURE_IMAGE_DIRECTORY = @"PNGs\FigurePNGs\";
+        void Move(Position newPosition,Position currentPosition);
 
-        void Move(Position newPosition);
-
-        void Move(Position newPosition, IFigure killingFigure);
-
+        List<BoardBlock> MovableBlocks(Grid boardGrid, VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation, int boardSize);
         string GetFigureName();
-
-        Position GetPosition();
-
-        void SetPosition(Position position);
-
         Color GetColor();
-
         void SetColor(Color color);
-
-        bool IsMovePossible(Position newPosition);
-
-        bool IsAttackPossible(Position newPosition);
-
         void Initialize();
-
         string GetPngPath();
-
-        Image GetImage();   
+        Image GetImage();
+        bool IsReadyToMove { get; protected set; }
     }
 }

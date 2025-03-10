@@ -1,65 +1,63 @@
 ﻿using Chess.Enums;
 using Chess.Interfaces;
 using System.Windows.Controls;
-using System.Windows.Shapes;
 
 namespace Chess.Entities.Figures
 {
-    public class Bishop : FigureBase<Bishop>
+    public class Bishop : FigureBase<Bishop>, IFigure
     {
-
         public Bishop(Chess.Enums.Color color) : base(color)
         {
-
         }
-        //Figure Specific Move Logic
-        public override void Move(Position newPosition, Position currentPosition)
-        {
 
-        }
-        public  Rectangle[] MovableBlocks(Grid boardGrid,VerticalOrientation verticalOrientation,HorizontalOrientation horizontalOrientation,int boardSize)
+        public List<BoardBlock>[] MovableBlocks(Grid boardGrid, VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation)
         {
+            MoveableRectangles.Clear();
+            CutableRectangles.Clear();
 
-            int col = (int)horizontalOrientation;
-            int row = (int)verticalOrientation;
+            int col = (int)horizontalOrientation;int row = (int)verticalOrientation;
 
             do
             {
                 col++; row++;
 
-                if (col == 8 || row == 8)
+                if (col == IBoardService.BOARD_SIZE || row == IBoardService.BOARD_SIZE)
                     break;
 
-            } while ((col < boardSize && row < boardSize));
+                if (!MoveCondition(row, col))
+                    break;
 
-            //RefreshOrientations(out row, out col);
+            } while ((col < IBoardService.BOARD_SIZE && row < IBoardService.BOARD_SIZE));
+
+            RefreshOrientations(out row, out col, verticalOrientation, horizontalOrientation);
 
             do
             {
                 col++; row--;
 
-                if (col == -1 || row == 8)
+                if (col == IBoardService.BOARD_SIZE || row == -1)
                     break;
 
-                //if (!AddExistingRectangleOnRectangeCollection(boardGrid, row, col, PAINT_RECTANGLES))
-                //    break;
-            } while (row >= 0 && col < boardSize);
+                if (!MoveCondition(row, col))
+                    break;
 
+            } while (row >= 0 && col < IBoardService.BOARD_SIZE);
 
-            //RefreshOrientations(out row, out col);
+            RefreshOrientations(out row, out col, verticalOrientation, horizontalOrientation);
 
             do
             {
                 col--; row++;
 
-                if (col == 8 || row == -1)
+                if (col == -1 || row == IBoardService.BOARD_SIZE)
                     break;
 
-                //if (!AddExistingRectangleOnRectangeCollection(boardGrid, row, col, PAINT_RECTANGLES))
+                if (!MoveCondition(row, col))
                     break;
-            } while ((col >= 0 && row < boardSize));
 
-            //RefreshOrientations(out row, out col);
+            } while ((col >= 0 && row < IBoardService.BOARD_SIZE));
+
+            RefreshOrientations(out row, out col, verticalOrientation, horizontalOrientation);
 
             do
             {
@@ -68,14 +66,12 @@ namespace Chess.Entities.Figures
                 if (col == -1 || row == -1)
                     break;
 
-                //if (!AddExistingRectangleOnRectangeCollection(boardGrid, row, col, PAINT_RECTANGLES))
+                if(!MoveCondition(row, col))
                     break;
+
             } while (row >= 0 && col >= 0);
 
-
-            //AddRectanglesIntoDictionary();
-            //return PAINT_RECTANGLES.ToArray();
-            return null;
+            return new List<BoardBlock>[] { MoveableRectangles, CutableRectangles };
         }
     }
 }

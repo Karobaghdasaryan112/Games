@@ -10,6 +10,9 @@ namespace Chess.Services
     public class BoardService : IBoardService
     {
         public static List<BoardBlock> BoardBlocks = new List<BoardBlock>();
+        public static List<BoardBlock> BoardPaintedToMoveBlocks = new List<BoardBlock>();
+        public static BoardBlock[] FigureAndMoveBlocks = new BoardBlock[2];
+        public static Turn Turn;//0 is turn of Whites and 1 is turn of Blacks
         private readonly IBoardBlockService _boardBlockService;
 
         public BoardService(IBoardBlockService boardBlockService)
@@ -62,6 +65,14 @@ namespace Chess.Services
                     BoardBlocks.Add(NewBoardBlock);
                 }
             }
+        }
+
+        public static void TurnSwitch()
+        {
+            if (Turn == Turn.White)
+                Turn = Turn.Black;
+            else
+                Turn = Turn.White;
         }
     }
 }

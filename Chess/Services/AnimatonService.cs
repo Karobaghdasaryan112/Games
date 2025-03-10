@@ -1,6 +1,5 @@
 ﻿using Chess.Interfaces;
 using System.Windows.Media.Animation;
-using System.Windows;
 using System.Windows.Shapes;
 using System.Windows.Media;
 using Chess.Entities;
@@ -11,28 +10,55 @@ namespace Chess.Services
     {
         public void PaintMovableBlockAnimation()
         {
-
         }
 
-        public void AnimateCell<TElement>(TElement cell, SolidColorBrush newColor, double newOpacity, double radius) where TElement : UIElement
+        public void AnimateCell(BoardBlock cellBlock, SolidColorBrush newColor, double newOpacity, double radius) 
         {
-            var animationOpacity = new DoubleAnimation(newOpacity, TimeSpan.FromMilliseconds(300));
-
-            if (cell is Rectangle rectangle)
+            if (cellBlock.IsReadyToMove == false)
             {
+                var animationOpacity = new DoubleAnimation(newOpacity, TimeSpan.FromMilliseconds(300));
+
                 var animationRadius = new DoubleAnimation(radius, TimeSpan.FromMilliseconds(300));
-                rectangle.BeginAnimation(Rectangle.OpacityProperty, animationOpacity);
-                rectangle.BeginAnimation(Rectangle.RadiusXProperty, animationRadius);
-                rectangle.BeginAnimation(Rectangle.RadiusYProperty, animationRadius);
-                rectangle.Fill = newColor;
+                cellBlock.RectangleForAnimation.BeginAnimation(Rectangle.OpacityProperty, animationOpacity);
+                cellBlock.RectangleForAnimation.BeginAnimation(Rectangle.RadiusXProperty, animationRadius);
+                cellBlock.RectangleForAnimation.BeginAnimation(Rectangle.RadiusYProperty, animationRadius);
+                cellBlock.RectangleForAnimation.Fill = newColor;
             }
         }
 
-        public void MovableBlocksAnimation(List<BoardBlock> boardBlocks, SolidColorBrush newColor, double newOpacity, double radius) 
+        public BoardBlock MovableBlocksAnimation(object sender,List<BoardBlock>[] boardBlocks, SolidColorBrush noveColor, SolidColorBrush cutColor, double newOpacity, double radius) 
         {
-            foreach (var boardBlock in boardBlocks)
+                var BoardBlock = sender as BoardBlock;
+                BoardService.FigureAndMoveBlocks[0] = BoardBlock;
+                MovableBlocksAnimationDisable();
+                if (boardBlocks != null)
+                {
+                    foreach (var boardBlock in boardBlocks[0])
+                    {
+                        AnimateCell(boardBlock, noveColor, newOpacity, radius);
+                        BoardService.BoardPaintedToMoveBlocks.Add(boardBlock);
+                        boardBlock.IsReadyToMove = true;
+                    }
+                foreach (var boardBlock in boardBlocks[1])
+                {
+                    AnimateCell(boardBlock, cutColor, newOpacity, radius);
+                    BoardService.BoardPaintedToMoveBlocks.Add(boardBlock);
+                    boardBlock.IsReadyToMove = true;
+                }
+            }
+                return BoardBlock;
+            
+        }
+
+        public void MovableBlocksAnimationDisable()
+        {
+            if (BoardService.BoardPaintedToMoveBlocks.Count > 0)
             {
-                AnimateCell<Rectangle>(boardBlock.RectangleGrid.Children.OfType<Rectangle>().FirstOrDefault(), newColor, newOpacity, radius);
+                foreach (var BoardBlock in BoardService.BoardPaintedToMoveBlocks)
+                {
+                    BoardBlock.IsReadyToMove = false;
+                    AnimateCell(BoardBlock, BoardBlock.ActualColor, BoardBlock.NOUSE_LEAVE_OPACITY, BoardBlock.MOUSE_LEAVE_RECTANGLE_RADIUS);
+                }
             }
         }
     }

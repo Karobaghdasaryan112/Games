@@ -1,8 +1,10 @@
 ﻿
+using System.Windows.Controls;
+
 namespace Chess.Interfaces
 {
-    public class IBoardBlock
+    public interface IBoardBlock
     {
-
+        void SetFigureImageIntoRectangle(Image image);
     }
 }

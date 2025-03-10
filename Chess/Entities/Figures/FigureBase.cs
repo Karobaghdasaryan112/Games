@@ -1,5 +1,7 @@
 ﻿using Chess.Enums;
+using Chess.Extentions;
 using Chess.Interfaces;
+using Chess.Services;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,6 +12,8 @@ namespace Chess.Entities.Figures
 {
     public class FigureBase<TFigure> : IFigure where TFigure : IFigure
     {
+        public static List<BoardBlock> MoveableRectangles = new List<BoardBlock>();
+        public static List<BoardBlock> CutableRectangles = new List<BoardBlock>();
         protected Enums.Color _color;
         protected Image _element;
         protected string _pngPath;
@@ -40,6 +44,11 @@ namespace Chess.Entities.Figures
             return _element;
         }
 
+        public void SetImage(Image image)
+        {
+            _element = image;
+        }
+
         public string GetPngPath() => GetPath(GetFigureName(), GetColor());
 
         public void Initialize()
@@ -54,17 +63,12 @@ namespace Chess.Entities.Figures
             }
         }
 
-        public virtual void Move(Position newPosition, Position currentPosition)
-        {   
-
-        }
-
         public void SetColor(Enums.Color color)
         {
             _color = color;
         }
 
-        protected string GetPath(string FigureName,Enums.Color color)
+        protected string GetPath(string FigureName, Enums.Color color)
         {
             string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -86,9 +90,33 @@ namespace Chess.Entities.Figures
             return imagePath;
         }
 
-        public List<BoardBlock> MovableBlocks(Grid boardGrid, VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation, int boardSize)
+        public List<BoardBlock>[] MovableBlocks(Grid boardGrid, VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation)
         {
-            throw new NotImplementedException();
+            return default;
+        }
+
+        protected void RefreshOrientations(out int row, out int col, VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation)
+        {
+            col = (int)horizontalOrientation; row = (int)verticalOrientation;
+        }
+
+
+        protected bool MoveCondition(int row, int col)
+        {
+            var MovableBoardBlock = BoardService.BoardBlocks.GetElement(new Position((VerticalOrientation)row, (HorizontalOrientation)col));
+
+            if (MovableBoardBlock.Figure == default)
+            {
+                MoveableRectangles.Add(MovableBoardBlock);
+                return true;
+            }
+            else
+            {
+                if (MovableBoardBlock.Figure.GetColor().ToString() != BoardService.Turn.ToString())
+                    CutableRectangles.Add(MovableBoardBlock);
+            }
+
+            return false;
         }
     }
 }

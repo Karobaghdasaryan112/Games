@@ -14,6 +14,8 @@ namespace Chess.Entities
         public static readonly SolidColorBrush EVENT_COLOR = ((SolidColorBrush)new BrushConverter().ConvertFrom("#FFA9A9A9"));
         public static readonly SolidColorBrush WHITE_COLOR = ((SolidColorBrush)new BrushConverter().ConvertFrom("#FF2F4F4F"));
         public static readonly SolidColorBrush BLACK_COLOR = ((SolidColorBrush)new BrushConverter().ConvertFrom("#FFDEB887"));
+        public static readonly SolidColorBrush CUT_COLOR = ((SolidColorBrush)new BrushConverter().ConvertFrom("#FF8B0000"));
+
         public static readonly double MOUSE_ENTER_OPACITY = 0.6;
         public static readonly double NOUSE_LEAVE_OPACITY = 1.0;
         public static readonly int MOUSE_ENTER_RECTANGLE_RADIUS = 16;
@@ -46,8 +48,38 @@ namespace Chess.Entities
         //Figure Image
         //[
         public Image FigureImage { get; set; }
-
-
         //]
+
+        public bool IsReadyToMove {  get; set; }
+
+        public void SetFigureImageIntoRectangle(Image image)
+        {
+            this.FigureImage = image;
+
+            var RectangleImage = RectangleGrid?.Children?.OfType<Image>().FirstOrDefault();
+            var Count = RectangleGrid.Children.Count;
+
+            if (RectangleImage != null)
+            {
+                RectangleGrid.Children.Remove(RectangleImage);
+            }
+
+            if (image != null)
+            {
+                var newImage = new Image
+                {
+                    Source = image.Source,
+                };
+
+                RectangleGrid.Children.Add(newImage);
+
+                this.FigureImage = newImage;
+
+                
+
+                return;
+            }
+            RectangleGrid.Children.Add(new Image());
+        }
     }
 }

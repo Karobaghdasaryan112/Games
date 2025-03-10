@@ -8,8 +8,10 @@ namespace Chess.Interfaces
 {
     public interface IAnimationService
     {
-        void AnimateCell<TElement>(TElement cell, SolidColorBrush newColor, double newOpacity, double radius) where TElement : UIElement;
+        void AnimateCell(BoardBlock cell, SolidColorBrush newColor, double newOpacity, double radius);
 
-        void MovableBlocksAnimation(List<BoardBlock> rectangles, SolidColorBrush newColor, double newOpacity, double radius);
+        BoardBlock MovableBlocksAnimation(object sender,List<BoardBlock>[] rectangles, SolidColorBrush newColor, SolidColorBrush cutColor, double newOpacity, double radius);
+
+        void MovableBlocksAnimationDisable();
     }
 }

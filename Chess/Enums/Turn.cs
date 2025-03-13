@@ -1,6 +1,4 @@
-﻿
-
-namespace Chess.Enums
+﻿namespace Chess.Enums
 {
     public enum Turn
     {

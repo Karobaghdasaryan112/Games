@@ -12,6 +12,9 @@ namespace Chess.Services
         public static List<BoardBlock> BoardBlocks = new List<BoardBlock>();
         public static List<BoardBlock> BoardPaintedToMoveBlocks = new List<BoardBlock>();
         public static BoardBlock[] FigureAndMoveBlocks = new BoardBlock[2];
+        public static bool IsChecked = false;
+        public static bool WrongMoveIfKingIsChecked = false;
+        public static HashSet<BoardBlock> AttackedFigureOnKing = new HashSet<BoardBlock>();
         public static Turn Turn;//0 is turn of Whites and 1 is turn of Blacks
         private readonly IBoardBlockService _boardBlockService;
 

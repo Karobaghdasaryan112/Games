@@ -11,7 +11,12 @@ namespace Chess.Entities.Figures
         {
         }
 
-        public List<BoardBlock>[] MovableBlocks(Grid boardGrid, VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation)
+        public override string GetFigureName()
+        {
+            return typeof(Pawn).Name;
+        }
+
+        public List<BoardBlock>[] MovableBlocks(VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation,Color color)
         {
             MoveableRectangles.Clear();
             CutableRectangles.Clear();

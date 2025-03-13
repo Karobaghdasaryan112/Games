@@ -19,8 +19,12 @@ namespace Chess.Entities.Figures
         protected string _pngPath;
         protected TFigure _figureType;
         protected bool _isReadyToMove;
+        protected bool _isReadyToCut;
 
         public bool IsReadyToMove { get => _isReadyToMove; set => _isReadyToMove = value; }
+
+        public bool IsReadyToCut { get => _isReadyToCut; set => _isReadyToCut = value; }
+        public string FigureName { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public FigureBase(Enums.Color color)
         {
@@ -34,7 +38,7 @@ namespace Chess.Entities.Figures
             return _color;
         }
 
-        public string GetFigureName()
+        public virtual string GetFigureName()
         {
             return typeof(TFigure).Name;
         }
@@ -53,6 +57,7 @@ namespace Chess.Entities.Figures
 
         public void Initialize()
         {
+            
             if (File.Exists(_pngPath))
             {
                 _element.Source = new BitmapImage(new Uri(_pngPath, UriKind.Absolute));
@@ -90,7 +95,7 @@ namespace Chess.Entities.Figures
             return imagePath;
         }
 
-        public List<BoardBlock>[] MovableBlocks(Grid boardGrid, VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation)
+        public List<BoardBlock>[] MovableBlocks(VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation, Color color)
         {
             return default;
         }
@@ -105,14 +110,14 @@ namespace Chess.Entities.Figures
         {
             var MovableBoardBlock = BoardService.BoardBlocks.GetElement(new Position((VerticalOrientation)row, (HorizontalOrientation)col));
 
-            if (MovableBoardBlock.Figure == default)
+            if (MovableBoardBlock?.Figure == default)
             {
                 MoveableRectangles.Add(MovableBoardBlock);
                 return true;
             }
             else
             {
-                if (MovableBoardBlock.Figure.GetColor().ToString() != BoardService.Turn.ToString())
+                if ( this._color != MovableBoardBlock?.Figure?.GetColor())
                     CutableRectangles.Add(MovableBoardBlock);
             }
 

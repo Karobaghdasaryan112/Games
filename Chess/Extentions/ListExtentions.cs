@@ -17,6 +17,11 @@ namespace Chess.Extentions
             return boardBlocks.Where(B => B.Figure?.GetFigureName() == figureName && B?.Figure?.GetColor().ToString() == figureColor.ToString()).FirstOrDefault();
         }
 
+        public static IEnumerable<BoardBlock> GetAllSameFigures(this List<BoardBlock> boardBlocks,string figureName,Color figureColor)
+        {
+            return boardBlocks.Where(B => B.Figure?.GetFigureName() == figureName && B?.Figure?.GetColor().ToString() == figureColor.ToString());
+        }
+
         public static BoardBlock GetBoardBlockWithPosition(this List<BoardBlock> boardBlocks, Position position)
         {
             return boardBlocks.Where(Board => Board.Position == position).FirstOrDefault();

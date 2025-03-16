@@ -15,8 +15,9 @@ namespace Chess.Services
         public static bool IsChecked = false;
         public static bool WrongMoveIfKingIsChecked = false;
         public static HashSet<BoardBlock> AttackedFigureOnKing = new HashSet<BoardBlock>();
-        public static Turn Turn;//0 is turn of Whites and 1 is turn of Blacks
+        public static Turn Turn;
         private readonly IBoardBlockService _boardBlockService;
+        public static List<BoardBlock> TryingToUnCheckedBoardBlocks = new List<BoardBlock>();
 
         public BoardService(IBoardBlockService boardBlockService)
         {

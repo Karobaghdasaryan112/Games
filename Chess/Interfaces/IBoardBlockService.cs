@@ -10,7 +10,7 @@ namespace Chess.Interfaces
     public interface IBoardBlockService
     {
         BoardBlock SetBoardBlockOnBoard<TFigure>(SolidColorBrush boardNormalColor, TFigure figure, Position position, Grid boardGrid) where TFigure : IFigure;
-        void SetFigureAnimations(Grid boardGrid,VerticalOrientation verticalOrientation,HorizontalOrientation horizontalOrientation,IFigure newFigure,Grid RectangleGridForBlockBoard, BoardBlock newBoardBlockWithFigure);
-        void SetEmptyBoardAnimations(BoardBlock newBoardBlockWithFigure,Grid boardGrid);
+        Task SetFigureAnimations(Grid boardGrid,VerticalOrientation verticalOrientation,HorizontalOrientation horizontalOrientation,IFigure newFigure,Grid RectangleGridForBlockBoard, BoardBlock newBoardBlockWithFigure);
+        Task SetEmptyBoardAnimations(BoardBlock newBoardBlockWithFigure,Grid boardGrid);
     }
 }

@@ -7,7 +7,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 
-
 namespace Chess.Entities.Figures
 {
     public class FigureBase<TFigure> : IFigure where TFigure : IFigure
@@ -76,7 +75,7 @@ namespace Chess.Entities.Figures
         protected string GetPath(string FigureName, Enums.Color color)
         {
             string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-
+            
             string projectDirectory = Directory.GetParent(
                 Directory.GetParent(
                     Directory.GetParent(

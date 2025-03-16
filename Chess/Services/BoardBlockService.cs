@@ -1,6 +1,7 @@
 ﻿using Chess.Entities;
 using Chess.Enums;
 using Chess.Interfaces;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -9,13 +10,16 @@ namespace Chess.Services
 {
     public class BoardBlockService : IBoardBlockService
     {
+        private bool _isProcessingForFigureEvent = false;
+        private bool _isProcessingForEmptyBoard = false;
         private IAnimationService _animatonService;
         private IFigureService _figureService;
-        public const int BOARD_SIZE = 8;
+
         public BoardBlockService(IAnimationService animatonService, IFigureService figureService)
         {
             _animatonService = animatonService;
             _figureService = figureService;
+
         }
 
         public BoardBlock SetBoardBlockOnBoard<TFigure>(SolidColorBrush boardNormalColor, TFigure figure, Position position, Grid boardGrid) where TFigure : IFigure
@@ -58,7 +62,7 @@ namespace Chess.Services
             else
                 cellContainer.Children.Add(new Image());
 
-            newBoardBlockWithFigure.RectangleForAnimation.MouseLeftButtonUp += (s, e) => SetEmptyBoardAnimations(newBoardBlockWithFigure, boardGrid);
+            newBoardBlockWithFigure.RectangleForAnimation.MouseLeftButtonUp += async (s, e) => { e.Handled = true; await SetEmptyBoardAnimations(newBoardBlockWithFigure, boardGrid); };
             SetMouseLeaveAndEnterAnimations(newBoardBlockWithFigure);
 
             Grid.SetRow(cellContainer, VerticalOrientation);
@@ -69,10 +73,35 @@ namespace Chess.Services
             return newBoardBlockWithFigure;
         }
 
-        public void SetFigureAnimations(Grid boardGrid, VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation, IFigure newFigure, Grid RectangleGridForBlockBoard, BoardBlock newBoardBlockWithFigure)
+        public async Task SetFigureAnimations(Grid boardGrid, VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation, IFigure newFigure, Grid RectangleGridForBlockBoard, BoardBlock newBoardBlockWithFigure)
         {
             if (newBoardBlockWithFigure.Figure == null)
                 return;
+
+            if (BoardService.IsChecked)
+            {
+                if (BoardService.FigureAndMoveBlocks[0] == null)
+                {
+                    if (newBoardBlockWithFigure.Figure.GetColor().ToString() != BoardService.Turn.ToString())
+                        return;
+                }
+                else
+                {
+                    if (BoardService.FigureAndMoveBlocks[0]?.Figure == null)
+                    {
+                        if (newBoardBlockWithFigure.Figure.GetColor().ToString() == BoardService.Turn.ToString() ||
+                            BoardService.FigureAndMoveBlocks[0].Figure.GetColor().ToString() != BoardService.Turn.ToString())
+                            return;
+                    }
+                }
+            }
+
+            if (BoardService.FigureAndMoveBlocks[0] == newBoardBlockWithFigure)
+            {
+                _animatonService.MovableBlocksAnimationDisable();
+                BoardService.FigureAndMoveBlocks[0] = null;
+                return;
+            }
 
             if (BoardService.Turn.ToString() == newFigure.GetColor().ToString())
                 _animatonService.MovableBlocksAnimation(
@@ -92,31 +121,54 @@ namespace Chess.Services
 
                 _figureService.FigureCut(BoardService.FigureAndMoveBlocks[0], newBoardBlockWithFigure, boardGrid);
 
-                IsKingCheckedForeMove(boardGrid, cuttingFigureBefore, cuttedFigureBefore);
+                await IsKingCheckedForeMove(boardGrid, cuttingFigureBefore, cuttedFigureBefore);
+
+                BoardService.FigureAndMoveBlocks[0] = null;
 
                 if (BoardService.WrongMoveIfKingIsChecked)
+                {
                     return;
+                }
+                else
+                    BoardService.IsChecked = false;
 
             }
             SetAllAnimationsIntoBoardBlock(newBoardBlockWithFigure, boardGrid);
-        }
 
-        public void SetEmptyBoardAnimations(BoardBlock newBoardBlockWithFigure, Grid boardGrid)
+
+        }
+        public async Task SetEmptyBoardAnimations(BoardBlock newBoardBlockWithFigure, Grid boardGrid)
         {
             if (BoardService.FigureAndMoveBlocks[0] != null)
             {
-                _figureService.FigureMove(BoardService.FigureAndMoveBlocks[0], newBoardBlockWithFigure, boardGrid);
+                if (BoardService.FigureAndMoveBlocks[0]?.Figure?.GetColor().ToString() == BoardService.Turn.ToString())
+                {
+                    _figureService.FigureMove(BoardService.FigureAndMoveBlocks[0], newBoardBlockWithFigure, boardGrid);
 
-                IsKingCheckedForeMove(boardGrid, BoardService.FigureAndMoveBlocks[0], newBoardBlockWithFigure);
+                    await IsKingCheckedForeMove(boardGrid, BoardService.FigureAndMoveBlocks[0], newBoardBlockWithFigure);
 
-                SetAllAnimationsIntoBoardBlock(newBoardBlockWithFigure, boardGrid);
+                    //if (await _figureService.IsMateState(boardGrid))
+                    //{
+                    //    MessageBox.Show("Mate");
+                    //}
+
+                    BoardService.FigureAndMoveBlocks[0] = null;
+
+                    if (BoardService.WrongMoveIfKingIsChecked)
+                    {
+                        return;
+                    }
+                    else
+                        BoardService.IsChecked = false;
+
+                    SetAllAnimationsIntoBoardBlock(newBoardBlockWithFigure, boardGrid);
+                }
             }
         }
 
-
         public void SetMouseLeaveAndEnterAnimations(BoardBlock newBoardBlockWithFigure)
         {
-            newBoardBlockWithFigure.RectangleForAnimation.MouseEnter += (s, e) =>
+            newBoardBlockWithFigure.RectangleForAnimation.MouseEnter += (s, e) => 
             _animatonService.AnimateCell(newBoardBlockWithFigure, BoardBlock.MOVE_COLOR, BoardBlock.MOUSE_ENTER_OPACITY, BoardBlock.MOUSE_ENTER_RECTANGLE_RADIUS);
 
             newBoardBlockWithFigure.RectangleForAnimation.MouseLeave += (s, e) =>
@@ -124,40 +176,53 @@ namespace Chess.Services
         }
 
 
-        public void IsKingCheckedForeMove(Grid boardGrid, BoardBlock cuttingFigureBefore, BoardBlock cuttedFigureBefore)
+        public async Task IsKingCheckedForeMove(Grid boardGrid, BoardBlock cuttingFigureBefore, BoardBlock cuttedFigureBefore)
         {
-            if (_figureService.IsKingCheckedCondition())
+            if ( await _figureService.IsKingCheckedCondition())
             {
+
+
                 if (BoardService.WrongMoveIfKingIsChecked)
                 {
-                    _figureService.RoleBackAfterMoving(ref cuttingFigureBefore, ref cuttedFigureBefore, boardGrid);
+                    MessageBox.Show("Wrong Move");
+                    _figureService.RoleBackAfterMoving(cuttingFigureBefore, cuttedFigureBefore, boardGrid);
 
                     SetAllAnimationsIntoBoardBlock(cuttingFigureBefore, boardGrid);
 
                     SetAllAnimationsIntoBoardBlock(cuttedFigureBefore, boardGrid);
                 }
+                else
+                    MessageBox.Show("Your King Is Checked");
             }
+            BoardService.WrongMoveIfKingIsChecked = false;
+            await Task.CompletedTask;
         }
 
         public void SetAllAnimationsIntoBoardBlock(BoardBlock boardBlock, Grid boardGrid)
         {
             if (boardBlock.Figure != null)
             {
-                boardBlock.Figure.GetImage().MouseLeftButtonUp += (s, e) =>
-                SetFigureAnimations(
-                    boardGrid,
-                    boardBlock.Position.GetVerticalOrientation(),
-                    boardBlock.Position.GetHorizontalOrientation(),
-                    boardBlock.Figure,
-                    boardBlock.RectangleGrid,
-                    boardBlock);
 
-
+                boardBlock.Figure.GetImage().MouseLeftButtonUp += async (s, e) =>
+                {
+                    e.Handled = true;
+                    await SetFigureAnimations(
+                        boardGrid,
+                        boardBlock.Position.GetVerticalOrientation(),
+                        boardBlock.Position.GetHorizontalOrientation(),
+                        boardBlock.Figure,
+                        boardBlock.RectangleGrid,
+                        boardBlock);
+                };
                 _figureService.SetImageEventIntoBoardBlockEvent(boardBlock.Figure, boardBlock);
 
-                SetMouseLeaveAndEnterAnimations(boardBlock);
-
             }
+            else
+            {
+                boardBlock.RectangleForAnimation.MouseLeftButtonUp += async (s, e) => { e.Handled = true;  await SetEmptyBoardAnimations(boardBlock, boardGrid); };
+            }
+
+            SetMouseLeaveAndEnterAnimations(boardBlock);
         }
     }
 }

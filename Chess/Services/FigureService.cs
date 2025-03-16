@@ -6,7 +6,7 @@ using Chess.Interfaces;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-
+        
 namespace Chess.Services
 {
     public class FigureService : IFigureService
@@ -52,6 +52,7 @@ namespace Chess.Services
                 _animationService.MovableBlocksAnimationDisable();
                 BoardService.TurnSwitch();
             }
+
         }
 
         public void ReInitializeFiguresAndEmptiBoardBlocks(BoardBlock figureBoardBlock, BoardBlock moveBoardBlock, Image setImage, IFigure setNewFigure)
@@ -68,7 +69,7 @@ namespace Chess.Services
             figureBoardBlock.Figure = setNewFigure;
         }
 
-        public bool IsKingCheckedCondition()
+        public async Task<bool> IsKingCheckedCondition()
         {
             var WhitekingBlock = BoardService.BoardBlocks.GetBoardBlockWithFigureName("King", Color.White);
             var BlackkingBlock = BoardService.BoardBlocks.GetBoardBlockWithFigureName("King", Color.Black);
@@ -79,11 +80,11 @@ namespace Chess.Services
             var verticalOrientationOfBlackKingBlock = BlackkingBlock.Position.GetVerticalOrientation();
             var horizontalOrientationOfBlackKingBlock = BlackkingBlock.Position.GetHorizontalOrientation();
 
-            CheckedLogic(Color.Black, BlackkingBlock, verticalOrientationOfBlackKingBlock, horizontalOrientationOfBlackKingBlock);
+           await CheckedLogic(Color.Black, BlackkingBlock, verticalOrientationOfBlackKingBlock, horizontalOrientationOfBlackKingBlock);
             if (BoardService.IsChecked)
                 return true;
 
-            CheckedLogic(Color.White, WhitekingBlock, verticalOrientationOfWhiteKingBlock, horizontalOrientationOfWhiteKingBlock);
+           await CheckedLogic(Color.White, WhitekingBlock, verticalOrientationOfWhiteKingBlock, horizontalOrientationOfWhiteKingBlock);
 
             return BoardService.IsChecked;
 
@@ -107,9 +108,11 @@ namespace Chess.Services
             return AttackedFigureBoardBlocks.Any();
         }
 
-        private void CheckedLogic(Color color, BoardBlock KingBoardBlock, VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation)
+        private async Task CheckedLogic(Color color, BoardBlock KingBoardBlock, VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation)
         {
-            if (IsAttackedBy(new Pawn(color), KingBoardBlock, verticalOrientation, horizontalOrientation, new List<string> { PAWN }) ||
+            BoardService.AttackedFigureOnKing.Clear();
+            if (
+               IsAttackedBy(new Pawn(color),KingBoardBlock,verticalOrientation,horizontalOrientation,new List<string> { PAWN }) ||
                IsAttackedBy(new Rook(color), KingBoardBlock, verticalOrientation, horizontalOrientation, new List<string> { ROOK, QUEEN }) ||
                IsAttackedBy(new Bishop(color), KingBoardBlock, verticalOrientation, horizontalOrientation, new List<string> { BISHOP, QUEEN }) ||
                IsAttackedBy(new Knight(color), KingBoardBlock, verticalOrientation, horizontalOrientation, new List<string> { KNIGHT }) ||
@@ -118,14 +121,14 @@ namespace Chess.Services
             {
                 if (BoardService.Turn.ToString() == KingBoardBlock.Figure.GetColor().ToString())
                 {
-                    MessageBox.Show("Your King Is Checked");
                     BoardService.WrongMoveIfKingIsChecked = false;
+                    ((King)KingBoardBlock.Figure).IsChecked = true;
                     _animationService.AnimateCell(KingBoardBlock, BoardBlock.CHECKED_COLOR, BoardBlock.MOUSE_ENTER_OPACITY, BoardBlock.MOUSE_ENTER_RECTANGLE_RADIUS);
                 }
                 else
                 {
                     BoardService.WrongMoveIfKingIsChecked = true;
-                    MessageBox.Show("Wrong Move");
+
                 }
                 BoardService.IsChecked = true;
             }
@@ -134,8 +137,9 @@ namespace Chess.Services
                 BoardService.IsChecked = false;
                 _animationService.AnimateCell(KingBoardBlock, KingBoardBlock.ActualColor, BoardBlock.NOUSE_LEAVE_OPACITY, BoardBlock.MOUSE_LEAVE_RECTANGLE_RADIUS);
             }
+            await Task.CompletedTask;
         }
-        public void RoleBackAfterMoving(ref BoardBlock firstBoardBlock, ref BoardBlock secondBoardBlock, Grid boardGrid)
+        public void RoleBackAfterMoving(BoardBlock firstBoardBlock, BoardBlock secondBoardBlock, Grid boardGrid)
         {
             if (firstBoardBlock == null || secondBoardBlock == null)
                 return;
@@ -169,6 +173,7 @@ namespace Chess.Services
 
             }
             _animationService.MovableBlocksAnimationDisable();
+
             BoardService.TurnSwitch();
         }
         public void SetImageEventIntoBoardBlockEvent(IFigure newFigure, BoardBlock newBoardBlockWithFigure)
@@ -179,5 +184,92 @@ namespace Chess.Services
             newFigure.GetImage().MouseEnter += (s, e) => newBoardBlockWithFigure.RectangleForAnimation?.RaiseEvent(new MouseEventArgs(Mouse.PrimaryDevice, 0) { RoutedEvent = UIElement.MouseEnterEvent });
             newFigure.GetImage().MouseLeave += (s, e) => newBoardBlockWithFigure.RectangleForAnimation?.RaiseEvent(new MouseEventArgs(Mouse.PrimaryDevice, 0) { RoutedEvent = UIElement.MouseLeaveEvent });
         }
+
+        public async Task<bool> IsMateState(Grid boardGrid)
+        {
+            var FigureColor = BoardService.Turn == Turn.White ? Color.White : Color.Black;
+            var CheckedKingBlock = BoardService.BoardBlocks.GetBoardBlockWithFigureName("King", FigureColor);
+
+            if (!((King)CheckedKingBlock.Figure).IsChecked) 
+                return false;
+
+
+            var PawnsBlock = BoardService.BoardBlocks.GetAllSameFigures(PAWN, FigureColor).ToList();
+
+            var RooksBlock = BoardService.BoardBlocks.GetAllSameFigures(ROOK, FigureColor).ToList();
+            var KnightsBlock = BoardService.BoardBlocks.GetAllSameFigures(KNIGHT, FigureColor).ToList();
+            var BishopsBlock = BoardService.BoardBlocks.GetAllSameFigures(BISHOP, FigureColor).ToList();
+            var QueensBlock = BoardService.BoardBlocks.GetAllSameFigures(QUEEN, FigureColor).ToList();
+            var KingsBlock = BoardService.BoardBlocks.GetAllSameFigures(KING, FigureColor).ToList();
+
+            if (await TryingToUncheckedKing(boardGrid, PawnsBlock, FigureColor) &&
+            await TryingToUncheckedKing(boardGrid, RooksBlock, FigureColor) &&
+            await TryingToUncheckedKing(boardGrid, KnightsBlock, FigureColor) &&
+            await TryingToUncheckedKing(boardGrid, BishopsBlock, FigureColor) &&
+            await TryingToUncheckedKing(boardGrid, QueensBlock, FigureColor) &&
+            await TryingToUncheckedKing(boardGrid, KingsBlock, FigureColor))
+                return false;
+            return true;
+
+        }
+        private async Task<bool> TryingToUncheckedKing(Grid boardGrid, List<BoardBlock> tryingBoardBlocks, Color figureColor)
+        {
+            for (int baseIndex = 0; baseIndex < tryingBoardBlocks.Count; baseIndex++)
+            {
+                var CutAndMoveBlocks = tryingBoardBlocks[baseIndex].Figure.MovableBlocks(tryingBoardBlocks[baseIndex].Position.GetVerticalOrientation(), tryingBoardBlocks[baseIndex].Position.GetHorizontalOrientation(), figureColor);
+
+                var MoveBlocks = CutAndMoveBlocks[0];
+                var CutBlocks = CutAndMoveBlocks[1];
+
+                for (int index = 0; index < MoveBlocks.Count; index++)
+                {
+                    FigureMove(tryingBoardBlocks[baseIndex], MoveBlocks[index], boardGrid);
+
+                    var BlackkingBlock = BoardService.BoardBlocks.GetBoardBlockWithFigureName("King", figureColor);
+                    var verticalOrientationOfBlackKingBlock = BlackkingBlock.Position.GetVerticalOrientation();
+                    var horizontalOrientationOfBlackKingBlock = BlackkingBlock.Position.GetHorizontalOrientation();
+
+                    await CheckedLogic(figureColor, BlackkingBlock, verticalOrientationOfBlackKingBlock, horizontalOrientationOfBlackKingBlock);
+
+                    var CutAndMoveBlocksAgain = tryingBoardBlocks[baseIndex].Figure?.MovableBlocks(tryingBoardBlocks[baseIndex].Position.GetVerticalOrientation(), tryingBoardBlocks[baseIndex].Position.GetHorizontalOrientation(), figureColor);
+                    if (CutAndMoveBlocksAgain != null)
+                    {
+                        var MoveBlocksAgain = CutAndMoveBlocks[0];
+                        var CutBlocksAgain = CutAndMoveBlocks[1];
+                        if (!BoardService.IsChecked)
+                            return true;
+
+                        RoleBackAfterMoving(MoveBlocksAgain[index], tryingBoardBlocks[baseIndex], default);
+                    }
+                }
+
+                for (int index = 0; index < CutBlocks.Count; index++)
+                {
+                    FigureCut(tryingBoardBlocks[baseIndex], CutBlocks[index], boardGrid);
+
+                    var BlackkingBlock = BoardService.BoardBlocks.GetBoardBlockWithFigureName("King", figureColor);
+                    var verticalOrientationOfBlackKingBlock = BlackkingBlock.Position.GetVerticalOrientation();
+                    var horizontalOrientationOfBlackKingBlock = BlackkingBlock.Position.GetHorizontalOrientation();
+
+                    await CheckedLogic(figureColor, BlackkingBlock, verticalOrientationOfBlackKingBlock, horizontalOrientationOfBlackKingBlock);
+
+                    var CutAndMoveBlocksAgain = tryingBoardBlocks[baseIndex].Figure?.MovableBlocks(tryingBoardBlocks[baseIndex].Position.GetVerticalOrientation(), tryingBoardBlocks[baseIndex].Position.GetHorizontalOrientation(), figureColor);
+                    if (CutAndMoveBlocksAgain != null)
+                    {
+                        var MoveBlocksAgain = CutAndMoveBlocks[0];
+                        var CutBlocksAgain = CutAndMoveBlocks[1];
+                        if (!BoardService.IsChecked)
+                            return true;
+
+                        RoleBackAfterMoving(MoveBlocksAgain[index], tryingBoardBlocks[baseIndex], default);
+
+                    }
+                }
+            }
+            await Task<bool>.CompletedTask;
+            return false;
+        }
+
+
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Chess.Enums;
 using Chess.Interfaces;
-using System.Windows.Controls;
 
 namespace Chess.Entities.Figures
 {
@@ -42,7 +41,7 @@ namespace Chess.Entities.Figures
                     MoveCondition(row - 2, col);
                 }
                 else
-                    if (row + 1 >= 0)
+                    if (row - 1 >= 0)
                     MoveCondition(row - 1, col);
             }
             return new List<BoardBlock>[] { MoveableRectangles, CutableRectangles };

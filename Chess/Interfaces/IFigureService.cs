@@ -14,10 +14,12 @@ namespace Chess.Interfaces
 
         void ReInitializeFiguresAndEmptiBoardBlocks(BoardBlock figureBoardBlock, BoardBlock moveBoardBlock,Image setImage,IFigure setNewFigure);
 
-        bool IsKingCheckedCondition();
+        Task<bool> IsKingCheckedCondition();
 
-        void RoleBackAfterMoving(ref BoardBlock cuttingBoardBlock,ref BoardBlock cuttedBoardBlock, Grid boardGrid);
+        void RoleBackAfterMoving(BoardBlock cuttingBoardBlock,BoardBlock cuttedBoardBlock, Grid boardGrid);
 
         void SetImageEventIntoBoardBlockEvent(IFigure newFigure, BoardBlock newBoardBlockWithFigure);
+
+        Task<bool> IsMateState(Grid boardGrid);
     }
 }

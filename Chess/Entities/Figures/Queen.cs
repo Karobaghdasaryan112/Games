@@ -1,7 +1,5 @@
 ﻿using Chess.Enums;
 using Chess.Interfaces;
-using Chess.Services;
-using System.Windows.Controls;
 
 namespace Chess.Entities.Figures
 {

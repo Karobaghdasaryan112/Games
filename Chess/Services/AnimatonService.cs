@@ -11,16 +11,18 @@ namespace Chess.Services
 
         public void AnimateCell(BoardBlock cellBlock, SolidColorBrush newColor, double newOpacity, double radius) 
         {
-            if (cellBlock.IsReadyToMove == false)
-            {
-                var animationOpacity = new DoubleAnimation(newOpacity, TimeSpan.FromMilliseconds(300));
 
-                var animationRadius = new DoubleAnimation(radius, TimeSpan.FromMilliseconds(300));
-                cellBlock.RectangleForAnimation.BeginAnimation(Rectangle.OpacityProperty, animationOpacity);
-                cellBlock.RectangleForAnimation.BeginAnimation(Rectangle.RadiusXProperty, animationRadius);
-                cellBlock.RectangleForAnimation.BeginAnimation(Rectangle.RadiusYProperty, animationRadius);
-                cellBlock.RectangleForAnimation.Fill = newColor;
-            }
+                if (cellBlock.IsReadyToMove == false)
+                {
+                    var animationOpacity = new DoubleAnimation(newOpacity, TimeSpan.FromMilliseconds(300));
+
+                    var animationRadius = new DoubleAnimation(radius, TimeSpan.FromMilliseconds(300));
+                    cellBlock.RectangleForAnimation.BeginAnimation(Rectangle.OpacityProperty, animationOpacity);
+                    cellBlock.RectangleForAnimation.BeginAnimation(Rectangle.RadiusXProperty, animationRadius);
+                    cellBlock.RectangleForAnimation.BeginAnimation(Rectangle.RadiusYProperty, animationRadius);
+                    cellBlock.RectangleForAnimation.Fill = newColor;
+                }
+            
         }
 
         public BoardBlock MovableBlocksAnimation(object sender, List<BoardBlock>[] boardBlocks, SolidColorBrush noveColor, SolidColorBrush cutColor, double newOpacity, double radius)
@@ -50,12 +52,24 @@ namespace Chess.Services
         {
             if (BoardService.BoardPaintedToMoveBlocks.Count > 0)
             {
+
                 foreach (var BoardBlock in BoardService.BoardPaintedToMoveBlocks)
                 {
+                    if (BoardBlock.RectangleForAnimation.Fill == BoardBlock.CHECKED_COLOR && BoardBlock.Figure != null)
+                        continue;
+
                     BoardBlock.IsReadyToMove = false;
                     AnimateCell(BoardBlock, BoardBlock.ActualColor, BoardBlock.NOUSE_LEAVE_OPACITY, BoardBlock.MOUSE_LEAVE_RECTANGLE_RADIUS);
+
                 }
             }
+        }
+
+        public void CastlingAnimation(BoardBlock cellBlock)
+        {
+            var Position = cellBlock.Position;
+
+                
         }
     }
 }

@@ -11,8 +11,11 @@ namespace Chess.Services
     {
         public static List<BoardBlock> BoardBlocks = new List<BoardBlock>();
         public static List<BoardBlock> BoardPaintedToMoveBlocks = new List<BoardBlock>();
+        public static List<BoardBlock[]> KingAndRookBlocks = new List<BoardBlock[]>();
+        public static List<BoardBlock[]> BeengCastleAndEmptyBlocks = new List<BoardBlock[]>();
         public static BoardBlock[] FigureAndMoveBlocks = new BoardBlock[2];
         public static bool IsChecked = false;
+        public static bool IsMateState = false;
         public static bool WrongMoveIfKingIsChecked = false;
         public static HashSet<BoardBlock> AttackedFigureOnKing = new HashSet<BoardBlock>();
         public static Turn Turn;

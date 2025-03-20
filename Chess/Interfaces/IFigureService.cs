@@ -20,6 +20,10 @@ namespace Chess.Interfaces
 
         void SetImageEventIntoBoardBlockEvent(IFigure newFigure, BoardBlock newBoardBlockWithFigure);
 
-        Task<bool> IsMateState(Grid boardGrid);
+        Task IsMateState(Grid boardGrid);
+
+        List<BoardBlock[]> CastlingMoveAnimation(Grid boardGrid);
+
+        void CastlingLogic(List<BoardBlock[]> listOfBoardBlocks, BoardBlock clickedBoardBlock, Grid boardGrid);
     }
 }

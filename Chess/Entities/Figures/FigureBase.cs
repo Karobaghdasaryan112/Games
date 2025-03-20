@@ -56,7 +56,7 @@ namespace Chess.Entities.Figures
 
         public void Initialize()
         {
-            
+
             if (File.Exists(_pngPath))
             {
                 _element.Source = new BitmapImage(new Uri(_pngPath, UriKind.Absolute));
@@ -75,7 +75,7 @@ namespace Chess.Entities.Figures
         protected string GetPath(string FigureName, Enums.Color color)
         {
             string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            
+
             string projectDirectory = Directory.GetParent(
                 Directory.GetParent(
                     Directory.GetParent(
@@ -107,8 +107,8 @@ namespace Chess.Entities.Figures
 
         protected bool MoveCondition(int row, int col)
         {
-            var MovableBoardBlock = BoardService.BoardBlocks.GetElement(new Position((VerticalOrientation)row, (HorizontalOrientation)col));
-
+            BoardBlock MovableBoardBlock = BoardService.BoardBlocks.GetElement(new Position((VerticalOrientation)row, (HorizontalOrientation)col));
+            
             if (MovableBoardBlock?.Figure == default)
             {
                 MoveableRectangles.Add(MovableBoardBlock);
@@ -116,8 +116,11 @@ namespace Chess.Entities.Figures
             }
             else
             {
-                if ( this._color != MovableBoardBlock?.Figure?.GetColor())
-                    CutableRectangles.Add(MovableBoardBlock);
+
+                if (this._color != MovableBoardBlock?.Figure?.GetColor())
+                {
+                    CutableRectangles.Add(MovableBoardBlock);                   
+                }
             }
 
             return false;

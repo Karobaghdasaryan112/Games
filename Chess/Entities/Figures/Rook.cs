@@ -5,6 +5,7 @@ namespace Chess.Entities.Figures
 {
     public class Rook : FigureBase<Rook>, IFigure
     {
+        public bool IsMoved = false;
         public Rook(Color color) : base(color)
         {
         }

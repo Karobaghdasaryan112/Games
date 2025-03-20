@@ -1,50 +1,59 @@
 ﻿using Chess.Enums;
+using Chess.Extentions;
 using Chess.Interfaces;
+using Chess.Services;
 
 namespace Chess.Entities.Figures
 {
     public class Pawn : FigureBase<Pawn>, IFigure
     {
-
-        public Pawn(Enums.Color color) : base(color)
+        public Pawn(Color color) : base(color)
         {
         }
-
         public override string GetFigureName()
         {
             return typeof(Pawn).Name;
         }
 
-        public List<BoardBlock>[] MovableBlocks(VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation,Color color)
+        public List<BoardBlock>[] MovableBlocks(VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation, Color color)
         {
             MoveableRectangles.Clear();
             CutableRectangles.Clear();
 
-            int row = (int)verticalOrientation; int col = (int)horizontalOrientation;
+            int row = (int)verticalOrientation;
+            int col = (int)horizontalOrientation;
+            int direction = (color == Color.White) ? 1 : -1; 
 
-            if (GetColor() == Enums.Color.White)
+            bool isStartingRow = (color == Color.White && row == (int)VerticalOrientation.b) ||
+                                 (color == Color.Black && row == (int)VerticalOrientation.g);
+
+            if (MoveCondition(row + direction, col))
             {
-                if (row == (int)VerticalOrientation.b)
-                {
-                    if(MoveCondition(row + 1, col))
-                    MoveCondition(row + 2, col);
-                }
-                else
-                    if (row + 1 < IBoardService.BOARD_SIZE)
-                    MoveCondition(row + 1, col);
+                if (isStartingRow)
+                    MoveCondition(row + 2 * direction, col);
             }
-            if (GetColor() == Enums.Color.Black)
-            {
-                if (row == (int)VerticalOrientation.g)
-                {
-                    if(MoveCondition(row - 1, col))
-                    MoveCondition(row - 2, col);
-                }
-                else
-                    if (row - 1 >= 0)
-                    MoveCondition(row - 1, col);
-            }
+            CutableRectangles.Clear();
+            if (col + 1 < IBoardService.BOARD_SIZE)
+                TryToGiveCuttingFigure(row + direction, col + 1);
+
+            if (col - 1 >= 0)
+                TryToGiveCuttingFigure(row + direction, col - 1);
+
             return new List<BoardBlock>[] { MoveableRectangles, CutableRectangles };
+        }
+
+        private void TryToGiveCuttingFigure(int row, int col)
+        {
+
+            var TryingToCutFIgure = BoardService.BoardBlocks.GetElement(new Position((VerticalOrientation)row, (HorizontalOrientation)col));
+
+            if (TryingToCutFIgure.Figure != null)
+            {
+                if (TryingToCutFIgure?.Figure?.GetColor() != this.GetColor())
+                {
+                    CutableRectangles.Add(TryingToCutFIgure);
+                }
+            }
         }
     }
 }

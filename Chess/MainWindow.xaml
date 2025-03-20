@@ -16,6 +16,8 @@
 
         <Grid x:Name="BoardGrid" Grid.Column="0"
               Margin="10"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch"
               Background="Beige">
         </Grid>
 

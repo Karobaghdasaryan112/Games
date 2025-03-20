@@ -8,12 +8,10 @@ namespace Chess.Entities.Figures
         public Bishop(Chess.Enums.Color color) : base(color)
         {
         }
-
         public override string GetFigureName()
         {
             return typeof(Bishop).Name;
         }
-
 
         public List<BoardBlock>[] MovableBlocks(VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation,Color color)
         {

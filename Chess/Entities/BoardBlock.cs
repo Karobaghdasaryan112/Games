@@ -13,6 +13,7 @@ namespace Chess.Entities
         public static readonly SolidColorBrush BLACK_COLOR = ((SolidColorBrush)new BrushConverter().ConvertFrom("#FFDEB887"));
         public static readonly SolidColorBrush CUT_COLOR = ((SolidColorBrush)new BrushConverter().ConvertFrom("#FFF5F5DC"));
         public static readonly SolidColorBrush CHECKED_COLOR = ((SolidColorBrush)new BrushConverter().ConvertFrom("#FF8B0000"));
+        public static readonly SolidColorBrush CASTLING_COLOR = ((SolidColorBrush)new BrushConverter().ConvertFrom("#FFD2691E"));
 
         public static readonly double MOUSE_ENTER_OPACITY = 0.6;
         public static readonly double NOUSE_LEAVE_OPACITY = 1.0;

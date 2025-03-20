@@ -6,6 +6,7 @@ namespace Chess.Entities.Figures
     public class King : FigureBase<King>,IFigure
     {
         public bool IsChecked = false;
+        public bool IsMoved = false;
         public King(Color color) : base(color)
         {
         }
@@ -44,7 +45,7 @@ namespace Chess.Entities.Figures
             if (col - 1 >= 0)
                 MoveCondition(row, col - 1);
 
-            if (row - 1 < IBoardService.BOARD_SIZE)
+            if (row - 1 >= 0)
                 MoveCondition(row - 1, col);
 
             return new List<BoardBlock>[] { MoveableRectangles, CutableRectangles };

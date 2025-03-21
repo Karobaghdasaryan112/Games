@@ -8,10 +8,10 @@ namespace Chess.Services
 {
     public class AnimatonService : IAnimationService
     {
-
-        public void AnimateCell(BoardBlock cellBlock, SolidColorBrush newColor, double newOpacity, double radius) 
+        public async Task AnimateCell(BoardBlock cellBlock, SolidColorBrush newColor, double newOpacity, double radius)
         {
-
+            if (cellBlock != null)
+            {
                 if (cellBlock.IsReadyToMove == false)
                 {
                     var animationOpacity = new DoubleAnimation(newOpacity, TimeSpan.FromMilliseconds(300));
@@ -22,33 +22,34 @@ namespace Chess.Services
                     cellBlock.RectangleForAnimation.BeginAnimation(Rectangle.RadiusYProperty, animationRadius);
                     cellBlock.RectangleForAnimation.Fill = newColor;
                 }
-            
+                await Task.Delay(0);
+
+            }
         }
 
-        public BoardBlock MovableBlocksAnimation(object sender, List<BoardBlock>[] boardBlocks, SolidColorBrush noveColor, SolidColorBrush cutColor, double newOpacity, double radius)
+        public async Task<BoardBlock> MovableBlocksAnimation(object sender, List<BoardBlock>[] boardBlocks, SolidColorBrush noveColor, SolidColorBrush cutColor, double newOpacity, double radius)
         {
             var BoardBlock = sender as BoardBlock;
             BoardService.FigureAndMoveBlocks[0] = BoardBlock;
-            MovableBlocksAnimationDisable();
+            await MovableBlocksAnimationDisable();
             if (boardBlocks != null)
             {
                 foreach (var boardBlock in boardBlocks[0])
                 {
-                    AnimateCell(boardBlock, noveColor, newOpacity, radius);
+                    await AnimateCell(boardBlock, noveColor, newOpacity, radius);
                     BoardService.BoardPaintedToMoveBlocks.Add(boardBlock);
                     boardBlock.IsReadyToMove = true;
                 }
                 foreach (var boardBlock in boardBlocks[1])
                 {
-                    AnimateCell(boardBlock, cutColor, newOpacity, radius);
+                   await AnimateCell(boardBlock, cutColor, newOpacity, radius);
                     BoardService.BoardPaintedToMoveBlocks.Add(boardBlock);
                     boardBlock.IsReadyToMove = true;
                 }
             }
             return BoardBlock;
         }
-
-        public void MovableBlocksAnimationDisable()
+        public async Task MovableBlocksAnimationDisable()
         {
             if (BoardService.BoardPaintedToMoveBlocks.Count > 0)
             {
@@ -59,17 +60,24 @@ namespace Chess.Services
                         continue;
 
                     BoardBlock.IsReadyToMove = false;
-                    AnimateCell(BoardBlock, BoardBlock.ActualColor, BoardBlock.NOUSE_LEAVE_OPACITY, BoardBlock.MOUSE_LEAVE_RECTANGLE_RADIUS);
+                    await AnimateCell(BoardBlock, BoardBlock.ActualColor, BoardBlock.NOUSE_LEAVE_OPACITY, BoardBlock.MOUSE_LEAVE_RECTANGLE_RADIUS);
 
                 }
             }
         }
 
-        public void CastlingAnimation(BoardBlock cellBlock)
+        public  Task AnimateOpacity(BoardBlock block, double targetOpacity, int duration)
         {
-            var Position = cellBlock.Position;
+            var tcs = new TaskCompletionSource<bool>();
 
-                
+            var animation = new DoubleAnimation(targetOpacity, TimeSpan.FromMilliseconds(duration));
+
+
+            animation.Completed += (s, e) => tcs.TrySetResult(true);
+
+            block.RectangleForAnimation.BeginAnimation(Rectangle.OpacityProperty, animation);
+
+            return tcs.Task;
         }
     }
 }

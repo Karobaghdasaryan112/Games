@@ -10,7 +10,7 @@ namespace Chess.Interfaces
 
         void FigureCut(BoardBlock cuttingBoardblock, BoardBlock cuttedBoardblock, Grid boardGrid);
 
-        void FigureMove(BoardBlock figureBoardBlock, BoardBlock moveBoardBlock, Grid boardGrid);
+        bool FigureMove(BoardBlock figureBoardBlock, BoardBlock moveBoardBlock, Grid boardGrid);
 
         void ReInitializeFiguresAndEmptiBoardBlocks(BoardBlock figureBoardBlock, BoardBlock moveBoardBlock,Image setImage,IFigure setNewFigure);
 

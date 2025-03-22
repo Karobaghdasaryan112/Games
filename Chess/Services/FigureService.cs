@@ -6,7 +6,7 @@ using Chess.Interfaces;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-        
+
 namespace Chess.Services
 {
     public class FigureService : IFigureService
@@ -28,6 +28,9 @@ namespace Chess.Services
 
         public void FigureCut(BoardBlock cuttingBoardblock, BoardBlock cuttedBoardblock, Grid boardGrid)
         {
+            if (PawnCastling(cuttedBoardblock, cuttingBoardblock, boardGrid))
+                return;
+            //Simulation for Pawn castling
             if (cuttedBoardblock?.Figure == default || cuttingBoardblock?.Figure == default)
                 return;
 
@@ -43,6 +46,10 @@ namespace Chess.Services
 
         public bool FigureMove(BoardBlock figureBoardBlock, BoardBlock moveBoardBlock, Grid boardGrid)
         {
+            if (PawnCastling(figureBoardBlock, moveBoardBlock, boardGrid))
+                return true;
+            //Simulation for Pawn castling
+
             if (figureBoardBlock == null || moveBoardBlock == null)
                 return false;
 
@@ -110,6 +117,9 @@ namespace Chess.Services
                 var horizontalOrientationOfBlackKingBlock = BlackkingBlock.Position.GetHorizontalOrientation();
 
                 await CheckedLogic(Color.Black, BlackkingBlock, verticalOrientationOfBlackKingBlock, horizontalOrientationOfBlackKingBlock);
+
+                if (BoardService.IsChecked && !((King)WhitekingBlock?.Figure).IsChecked)
+                    return true;
             }
 
             return BoardService.IsChecked;
@@ -117,17 +127,21 @@ namespace Chess.Services
 
         private bool IsAttackedBy(IFigure virtualFigure, BoardBlock kingBlock, VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation, List<string> attackingFigures)
         {
+
             var attackBlocks = virtualFigure.MovableBlocks(verticalOrientation, horizontalOrientation, virtualFigure.GetColor())[1];
 
             var AttackedFigureBoardBlocks = attackBlocks
                 .Where(block => block.Figure != null && attackingFigures.Contains(block.Figure.GetFigureName()));
+
 
             if (AttackedFigureBoardBlocks.Count() != 0)
             {
                 foreach (var block in AttackedFigureBoardBlocks)
                     BoardService.AttackedFigureOnKing.Add(block);
 
+
             }
+
             return AttackedFigureBoardBlocks.Any();
         }
 
@@ -136,29 +150,51 @@ namespace Chess.Services
             BoardService.AttackedFigureOnKing.Clear();
 
             if (
+                IsAttackedBy(new King(color), KingBoardBlock, verticalOrientation, horizontalOrientation, new List<string> { KING }) ||
                IsAttackedBy(new Pawn(color), KingBoardBlock, verticalOrientation, horizontalOrientation, new List<string> { PAWN }) ||
                IsAttackedBy(new Rook(color), KingBoardBlock, verticalOrientation, horizontalOrientation, new List<string> { ROOK, QUEEN }) ||
                IsAttackedBy(new Bishop(color), KingBoardBlock, verticalOrientation, horizontalOrientation, new List<string> { BISHOP, QUEEN }) ||
                IsAttackedBy(new Knight(color), KingBoardBlock, verticalOrientation, horizontalOrientation, new List<string> { KNIGHT }) ||
-               IsAttackedBy(new Queen(color), KingBoardBlock, verticalOrientation, horizontalOrientation, new List<string> { QUEEN }) ||
-               IsAttackedBy(new King(color), KingBoardBlock, verticalOrientation, horizontalOrientation, new List<string> { KING }))
+               IsAttackedBy(new Queen(color), KingBoardBlock, verticalOrientation, horizontalOrientation, new List<string> { QUEEN }))
+
             {
-                if (BoardService.Turn.ToString() == KingBoardBlock.Figure.GetColor().ToString())
+                var KingBlock = BoardService.AttackedFigureOnKing.Where(board => board.Figure.GetType() == typeof(King)).FirstOrDefault();
+                if (BoardService.Turn.ToString() == KingBoardBlock.Figure.GetColor().ToString() && KingBlock == null)
                 {
                     BoardService.WrongMoveIfKingIsChecked = false;
                     ((King)KingBoardBlock.Figure).IsChecked = true;
                     BoardService.BoardPaintedToMoveBlocks.Add(KingBoardBlock);
+
                     await _animationService.AnimateCell(KingBoardBlock, BoardBlock.CHECKED_COLOR, BoardBlock.MOUSE_ENTER_OPACITY, BoardBlock.MOUSE_ENTER_RECTANGLE_RADIUS);
                 }
                 else
+                {
                     BoardService.WrongMoveIfKingIsChecked = true;
+
+                    if (KingBlock != null && !((King)KingBoardBlock.Figure).IsChecked)
+                        BoardService.WrongCheckedKing = true;
+                    else
+                        BoardService.WrongCheckedKing = false;
+                }
                 BoardService.IsChecked = true;
             }
             else
             {
+                ((King)KingBoardBlock.Figure).IsChecked = false;
                 BoardService.IsChecked = false;
                 await _animationService.AnimateCell(KingBoardBlock, KingBoardBlock.ActualColor, BoardBlock.NOUSE_LEAVE_OPACITY, BoardBlock.MOUSE_LEAVE_RECTANGLE_RADIUS);
             }
+
+            //foreach (var item in BoardService.AttackedFigureOnKing)
+            //{
+            //    if (item.Figure.GetType() == typeof(King))
+            //    {
+            //        if (!BoardService.WrongMoveIfKingIsChecked)
+            //            await _animationService.AnimateCell(KingBoardBlock, KingBoardBlock.ActualColor, BoardBlock.NOUSE_LEAVE_OPACITY, BoardBlock.MOUSE_LEAVE_RECTANGLE_RADIUS);
+            //        BoardService.WrongMoveIfKingIsChecked = true;
+            //        await _animationService.AnimateCell(item, item.ActualColor, BoardBlock.NOUSE_LEAVE_OPACITY, BoardBlock.MOUSE_LEAVE_RECTANGLE_RADIUS);
+            //    }
+            //}
         }
         public void RoleBackAfterMoving(BoardBlock firstBoardBlock, BoardBlock secondBoardBlock, Grid boardGrid)
         {
@@ -358,7 +394,7 @@ namespace Chess.Services
             if (((King)KingBlock.Figure).IsMoved)
                 return default;
 
-            for(int index = (int)HorizontalOrientation.position0 +1;index < (int)HorizontalOrientation.position4; index++)
+            for (int index = (int)HorizontalOrientation.position0 + 1; index < (int)HorizontalOrientation.position4; index++)
             {
 
                 var Blocks = BoardService.BoardBlocks.GetElement(new Position(verticalPosition, (HorizontalOrientation)index));
@@ -371,15 +407,15 @@ namespace Chess.Services
             for (int index = (int)HorizontalOrientation.position4 + 1; index < (int)HorizontalOrientation.position7; index++)
             {
                 var Blocks = BoardService.BoardBlocks.GetElement(new Position(verticalPosition, (HorizontalOrientation)index));
-                if (Blocks.Figure != null )
+                if (Blocks.Figure != null)
                     break;
-                if(index == (int)HorizontalOrientation.position6)
-                FindAndAddEmptyBlocksIntoCollectionForCastling(ListOfBoardBlocks, HorizontalOrientation.position4 + 2, verticalPosition, KingBlock, rightRook);
+                if (index == (int)HorizontalOrientation.position6)
+                    FindAndAddEmptyBlocksIntoCollectionForCastling(ListOfBoardBlocks, HorizontalOrientation.position4 + 2, verticalPosition, KingBlock, rightRook);
             }
 
             return ListOfBoardBlocks;
         }
-        public void FindAndAddEmptyBlocksIntoCollectionForCastling(List<BoardBlock[]> listOfBoardBlocks,HorizontalOrientation emptyBoardHorizontalPosition,VerticalOrientation emptyBoardVerticalPosition,BoardBlock kingBoardBlock,BoardBlock rookBoardBlock)
+        public void FindAndAddEmptyBlocksIntoCollectionForCastling(List<BoardBlock[]> listOfBoardBlocks, HorizontalOrientation emptyBoardHorizontalPosition, VerticalOrientation emptyBoardVerticalPosition, BoardBlock kingBoardBlock, BoardBlock rookBoardBlock)
         {
             listOfBoardBlocks.Add(new BoardBlock[2] { kingBoardBlock, rookBoardBlock });
             var AnimateBlock = BoardService.BoardBlocks.GetElement(new Position(emptyBoardVerticalPosition, (HorizontalOrientation)emptyBoardHorizontalPosition));
@@ -389,25 +425,28 @@ namespace Chess.Services
 
         public void CastlingLogic(List<BoardBlock[]> listOfBoardBlocks, BoardBlock clickedBoardBlock, Grid boardGrid)
         {
-            if (listOfBoardBlocks.Count == 0)
-                return;
-            foreach (var BoardBlocks in listOfBoardBlocks)
+            if (listOfBoardBlocks != null)
             {
-                var RookHorizontalEmptyBoardPosition = (Math.Abs(BoardBlocks[0].Position.GetHorizontalOrientation() - BoardBlocks[1].Position.GetHorizontalOrientation()) == 4 ? 3 : 5);
-                var KingHorizontalEmptyBoardPosition = (Math.Abs(BoardBlocks[0].Position.GetHorizontalOrientation() - BoardBlocks[1].Position.GetHorizontalOrientation()) == 4 ? 2 : 6);
-                var EventBoardBlock = BoardService.BoardBlocks.GetElement(new Position(BoardBlocks[0].Position.GetVerticalOrientation(), (HorizontalOrientation)KingHorizontalEmptyBoardPosition));
-
-                if (EventBoardBlock == clickedBoardBlock || BoardService.IsChecked)
+                if (listOfBoardBlocks.Count == 0)
+                    return;
+                foreach (var BoardBlocks in listOfBoardBlocks)
                 {
-                    var RookEmptyBoard = BoardService.BoardBlocks.GetElement(new Position(EventBoardBlock.Position.GetVerticalOrientation(), (HorizontalOrientation)RookHorizontalEmptyBoardPosition));
-                    VirtualFigureMoving(EventBoardBlock, BoardBlocks[0], boardGrid);
-                    VirtualFigureMoving(RookEmptyBoard, BoardBlocks[1], boardGrid);
-                    BoardService.BeengCastleAndEmptyBlocks.Add(new BoardBlock[] { BoardBlocks[0], clickedBoardBlock });
-                    BoardService.BeengCastleAndEmptyBlocks.Add(new BoardBlock[] { BoardBlocks[1], RookEmptyBoard });
+                    var RookHorizontalEmptyBoardPosition = (Math.Abs(BoardBlocks[0].Position.GetHorizontalOrientation() - BoardBlocks[1].Position.GetHorizontalOrientation()) == 4 ? 3 : 5);
+                    var KingHorizontalEmptyBoardPosition = (Math.Abs(BoardBlocks[0].Position.GetHorizontalOrientation() - BoardBlocks[1].Position.GetHorizontalOrientation()) == 4 ? 2 : 6);
+                    var EventBoardBlock = BoardService.BoardBlocks.GetElement(new Position(BoardBlocks[0].Position.GetVerticalOrientation(), (HorizontalOrientation)KingHorizontalEmptyBoardPosition));
 
+                    if (EventBoardBlock == clickedBoardBlock || BoardService.IsChecked)
+                    {
+                        var RookEmptyBoard = BoardService.BoardBlocks.GetElement(new Position(EventBoardBlock.Position.GetVerticalOrientation(), (HorizontalOrientation)RookHorizontalEmptyBoardPosition));
+                        VirtualFigureMoving(EventBoardBlock, BoardBlocks[0], boardGrid);
+                        VirtualFigureMoving(RookEmptyBoard, BoardBlocks[1], boardGrid);
+                        BoardService.BeengCastleAndEmptyBlocks.Add(new BoardBlock[] { BoardBlocks[0], clickedBoardBlock });
+                        BoardService.BeengCastleAndEmptyBlocks.Add(new BoardBlock[] { BoardBlocks[1], RookEmptyBoard });
+
+                    }
                 }
+                BoardService.TurnSwitch();
             }
-            BoardService.TurnSwitch();
         }
 
         public void GameBegin(Grid boardGrid)
@@ -435,5 +474,75 @@ namespace Chess.Services
             await _animationService.AnimateOpacity(block, initialOpacity, 300);
         }
 
+        public bool PawnCastling(BoardBlock pawnBoardBlock, BoardBlock emptyOrCuttedBoardBlock, Grid boardGrid)
+        {
+
+
+            if (pawnBoardBlock == null || emptyOrCuttedBoardBlock == null)
+                return false;
+
+            if (pawnBoardBlock.Figure.GetType() != typeof(Pawn))
+                return false;
+
+            var Position = emptyOrCuttedBoardBlock.Position;
+
+            if(Position.GetVerticalOrientation() != VerticalOrientation.h && Position.GetVerticalOrientation() != VerticalOrientation.a)
+                return false;
+
+            var FigureColor = pawnBoardBlock.Figure.GetColor(); 
+
+            StackPanel buttonPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(10)
+            };
+
+            boardGrid.Children.Add(buttonPanel);
+
+            var listOfFigure = new List<IFigure>
+            {
+                new Queen(FigureColor),
+                new Rook(FigureColor),
+                new Bishop(FigureColor),
+                new Knight(FigureColor)
+            };
+
+            foreach (var figure in listOfFigure)
+            {
+                figure.Initialize();
+            }
+
+            Dictionary<string, Image> figures = new Dictionary<string, Image>();
+
+            foreach (var figure in listOfFigure)
+            {
+                figures.Add(figure.GetType().Name, figure.GetImage());
+            }
+
+            foreach (var figure in figures)
+            {
+                buttonPanel.Children.Add(figure.Value);
+                figure.Value.MouseEnter += (s, e) => emptyOrCuttedBoardBlock.RectangleForAnimation?.RaiseEvent(new MouseEventArgs(Mouse.PrimaryDevice, 0) { RoutedEvent = UIElement.MouseEnterEvent });
+                figure.Value.MouseLeave += (s, e) => emptyOrCuttedBoardBlock.RectangleForAnimation?.RaiseEvent(new MouseEventArgs(Mouse.PrimaryDevice, 0) { RoutedEvent = UIElement.MouseLeaveEvent });
+                figure.Value.MouseDown += (s, e) =>
+                {
+                    emptyOrCuttedBoardBlock.SetFigureImageIntoRectangle(figure.Value);
+                    emptyOrCuttedBoardBlock.Figure = listOfFigure.Where(f => f.GetType().Name == figure.Key).FirstOrDefault();
+                    emptyOrCuttedBoardBlock.Figure.SetImage(figure.Value);
+                    emptyOrCuttedBoardBlock.FigureImage = figure.Value;
+                    emptyOrCuttedBoardBlock.Figure.SetImage(emptyOrCuttedBoardBlock.FigureImage);
+                    emptyOrCuttedBoardBlock.RectangleForAnimation.Fill = emptyOrCuttedBoardBlock.ActualColor;
+                    emptyOrCuttedBoardBlock.Figure.SetImage(emptyOrCuttedBoardBlock.FigureImage);
+                    boardGrid.Children.Remove(buttonPanel);
+                    ReInitializeFiguresAndEmptiBoardBlocks(pawnBoardBlock, emptyOrCuttedBoardBlock, default, default);
+                    CheckToMovableInRookAndKing(emptyOrCuttedBoardBlock);
+                    _animationService.MovableBlocksAnimationDisable();
+                    BoardService.TurnSwitch();
+                };
+            }
+            return true;
+            //Logic for castling from Pawn
+        }
     }
 }

@@ -46,12 +46,14 @@ namespace Chess.Entities.Figures
         {
 
             var TryingToCutFIgure = BoardService.BoardBlocks.GetElement(new Position((VerticalOrientation)row, (HorizontalOrientation)col));
-
-            if (TryingToCutFIgure.Figure != null)
+            if (TryingToCutFIgure != null)
             {
-                if (TryingToCutFIgure?.Figure?.GetColor() != this.GetColor())
+                if (TryingToCutFIgure.Figure != null)
                 {
-                    CutableRectangles.Add(TryingToCutFIgure);
+                    if (TryingToCutFIgure?.Figure?.GetColor() != this.GetColor())
+                    {
+                        CutableRectangles.Add(TryingToCutFIgure);
+                    }
                 }
             }
         }

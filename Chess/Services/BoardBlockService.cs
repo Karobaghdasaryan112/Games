@@ -1,6 +1,7 @@
 ﻿using Chess.Entities;
 using Chess.Entities.Figures;
 using Chess.Enums;
+using Chess.Extentions;
 using Chess.Interfaces;
 using System.Windows;
 using System.Windows.Controls;
@@ -98,7 +99,7 @@ namespace Chess.Services
 
             if (BoardService.FigureAndMoveBlocks[0] == newBoardBlockWithFigure)
             {
-               await _animatonService.MovableBlocksAnimationDisable();
+                await _animatonService.MovableBlocksAnimationDisable();
                 BoardService.FigureAndMoveBlocks[0] = null;
                 return;
             }
@@ -122,7 +123,7 @@ namespace Chess.Services
 
 
             if (BoardService.FigureAndMoveBlocks[0]?.Figure?.GetColor().ToString() !=
-                newBoardBlockWithFigure.Figure?.GetColor().ToString() && BoardService.FigureAndMoveBlocks[0]?.Figure != default && 
+                newBoardBlockWithFigure.Figure?.GetColor().ToString() && BoardService.FigureAndMoveBlocks[0]?.Figure != default &&
                 newBoardBlockWithFigure.RectangleForAnimation.Fill == BoardBlock.CUT_COLOR)
             {
                 BoardBlock cuttingFigureBefore = (BoardBlock)((ICloneable)BoardService.FigureAndMoveBlocks[0]).Clone();
@@ -130,7 +131,7 @@ namespace Chess.Services
                 cuttingFigureBefore.RectangleForAnimation.Fill = cuttingFigureBefore.ActualColor;
                 _figureService.FigureCut(BoardService.FigureAndMoveBlocks[0], newBoardBlockWithFigure, boardGrid);
 
-                await IsKingCheckedForeMove(boardGrid, cuttingFigureBefore, cuttedFigureBefore).ConfigureAwait(false);
+                await IsKingCheckedForeMove(boardGrid, cuttingFigureBefore, cuttedFigureBefore);
 
                 BoardService.FigureAndMoveBlocks[0] = null;
 
@@ -157,7 +158,7 @@ namespace Chess.Services
 
                     if (BoardService.FigureAndMoveBlocks[0]?.Figure?.GetType() == typeof(King))
                     {
-                        _figureService.CastlingLogic(BoardService.KingAndRookBlocks,newBoardBlockWithFigure, boardGrid);
+                        _figureService.CastlingLogic(BoardService.KingAndRookBlocks, newBoardBlockWithFigure, boardGrid);
 
                         if (await _figureService.IsKingCheckedCondition())
                         {
@@ -177,7 +178,7 @@ namespace Chess.Services
 
                                 BoardService.TurnSwitch();
 
-                                if (CheckedKing != null)
+                                if (CheckedKing != null && !BoardService.WrongCheckedKing)
                                     await _animatonService.AnimateCell(CheckedKing, BoardBlock.CHECKED_COLOR, BoardBlock.MOUSE_ENTER_OPACITY, BoardBlock.MOUSE_ENTER_RECTANGLE_RADIUS);
 
                             }
@@ -185,11 +186,14 @@ namespace Chess.Services
                         foreach (var item in BoardService.BeengCastleAndEmptyBlocks)
                         {
 
-                                SetAllAnimationsIntoBoardBlock(item[0], boardGrid);
-                                SetAllAnimationsIntoBoardBlock(item[1], boardGrid);
-                            
+                            SetAllAnimationsIntoBoardBlock(item[0], boardGrid);
+                            SetAllAnimationsIntoBoardBlock(item[1], boardGrid);
+
                         }
-                        BoardService.KingAndRookBlocks.Clear();
+                        if (BoardService.KingAndRookBlocks != null)
+                        {
+                            BoardService.KingAndRookBlocks.Clear();
+                        }
                         BoardService.BeengCastleAndEmptyBlocks.Clear();
                         return;
                     }
@@ -210,7 +214,7 @@ namespace Chess.Services
                             BoardService.IsChecked = false;
 
                         SetAllAnimationsIntoBoardBlock(newBoardBlockWithFigure, boardGrid);
-                    }   
+                    }
                 }
             }
         }
@@ -230,7 +234,7 @@ namespace Chess.Services
                 if (newBoardBlockWithFigure.RectangleForAnimation.Fill != BoardBlock.CHECKED_COLOR && newBoardBlockWithFigure.RectangleForAnimation.Fill != BoardBlock.CASTLING_COLOR)
                     _animatonService.AnimateCell(newBoardBlockWithFigure, newBoardBlockWithFigure.ActualColor, BoardBlock.NOUSE_LEAVE_OPACITY, BoardBlock.MOUSE_LEAVE_RECTANGLE_RADIUS);
             };
-            
+
         }
 
         public async Task IsKingCheckedForeMove(Grid boardGrid, BoardBlock cuttingFigureBefore, BoardBlock cuttedFigureBefore)
@@ -259,9 +263,12 @@ namespace Chess.Services
                     //await Task.Delay(3000);
                     _figureService.RoleBackAfterMoving(cuttingFigureBefore, cuttedFigureBefore, boardGrid);
 
-                    SetAllAnimationsIntoBoardBlock(cuttingFigureBefore, boardGrid);
+                    var OriginalCuttingFigureBefore = BoardService.BoardBlocks.GetElement(cuttingFigureBefore.Position);
+                    var OriginalCuttedFigureBefore = BoardService.BoardBlocks.GetElement(cuttedFigureBefore.Position);
 
-                    SetAllAnimationsIntoBoardBlock(cuttedFigureBefore, boardGrid);
+                    SetAllAnimationsIntoBoardBlock(OriginalCuttingFigureBefore, boardGrid);
+
+                    SetAllAnimationsIntoBoardBlock(OriginalCuttedFigureBefore, boardGrid);
 
                 }
                 else
@@ -271,7 +278,7 @@ namespace Chess.Services
 
                 await _figureService.IsMateState(boardGrid);
 
-                if(!await _figureService.IsKingCheckedCondition())
+                if (!await _figureService.IsKingCheckedCondition())
                 {
                     var Kings = BoardService.BoardBlocks.Where(block =>
                            block.Figure?.GetFigureName() == "King");
@@ -320,4 +327,3 @@ namespace Chess.Services
 
     }
 }
-

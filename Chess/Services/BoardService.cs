@@ -21,7 +21,8 @@ namespace Chess.Services
         public static Turn Turn;
         private readonly IBoardBlockService _boardBlockService;
         public static List<BoardBlock> TryingToUnCheckedBoardBlocks = new List<BoardBlock>();
-
+        public static bool WrongCheckedKing = false; 
+       
         public BoardService(IBoardBlockService boardBlockService)
         {
             _boardBlockService = boardBlockService;

@@ -129,8 +129,10 @@ namespace Chess.Services
                 BoardBlock cuttingFigureBefore = (BoardBlock)((ICloneable)BoardService.FigureAndMoveBlocks[0]).Clone();
                 BoardBlock cuttedFigureBefore = (BoardBlock)((ICloneable)newBoardBlockWithFigure).Clone();
                 cuttingFigureBefore.RectangleForAnimation.Fill = cuttingFigureBefore.ActualColor;
-                _figureService.FigureCut(BoardService.FigureAndMoveBlocks[0], newBoardBlockWithFigure, boardGrid);
-
+                await  _figureService.FigureCut(BoardService.FigureAndMoveBlocks[0], newBoardBlockWithFigure, boardGrid);
+                SetAllAnimationsIntoBoardBlock(newBoardBlockWithFigure, boardGrid);
+                FigureService.IsPawnCastling = false;
+                
                 await IsKingCheckedForeMove(boardGrid, cuttingFigureBefore, cuttedFigureBefore);
 
                 BoardService.FigureAndMoveBlocks[0] = null;
@@ -153,7 +155,10 @@ namespace Chess.Services
             {
                 if (BoardService.FigureAndMoveBlocks[0]?.Figure?.GetColor().ToString() == BoardService.Turn.ToString())
                 {
-                    var IsMovable = _figureService.FigureMove(BoardService.FigureAndMoveBlocks[0], newBoardBlockWithFigure, boardGrid);
+                    var IsMovable = await _figureService.FigureMove(BoardService.FigureAndMoveBlocks[0], newBoardBlockWithFigure, boardGrid);
+                    SetAllAnimationsIntoBoardBlock(newBoardBlockWithFigure, boardGrid);
+                    FigureService.IsPawnCastling = false;
+                    
 
 
                     if (BoardService.FigureAndMoveBlocks[0]?.Figure?.GetType() == typeof(King))
@@ -203,7 +208,7 @@ namespace Chess.Services
                     {
                         await IsKingCheckedForeMove(boardGrid, BoardService.FigureAndMoveBlocks[0], newBoardBlockWithFigure);
                         await _animatonService.MovableBlocksAnimationDisable();
-
+                        await SetEmptyBoardAnimations(BoardService.FigureAndMoveBlocks[0], boardGrid);
                         BoardService.FigureAndMoveBlocks[0] = null;
 
                         if (BoardService.WrongMoveIfKingIsChecked)

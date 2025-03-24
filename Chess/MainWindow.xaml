@@ -20,6 +20,33 @@
               VerticalAlignment="Stretch"
               Background="Beige">
         </Grid>
+        <Grid x:Name="CastlingGrid"  Width="240" Height="270" Visibility="Collapsed">
+            <Border Background="White" CornerRadius="10" Padding="10" Margin="10" 
+            VerticalAlignment="Center" HorizontalAlignment="Center" >
+
+                <StackPanel Width="200" Height="230">
+
+                    <Border Background="AntiqueWhite" CornerRadius="5" Margin="0 0 0 10">
+                        <TextBlock Foreground="Black"
+                           FontSize="14"
+                           FontWeight="Bold"
+                           TextAlignment="Center"
+                           Padding="5">
+                    Choose Castling Figure
+                        </TextBlock>
+                    </Border>
+
+                    <Button Content="Queen" Margin="5" Padding="5" Background="#FFD700"/>
+                    <Button Content="Rook" Margin="5" Padding="5" Background="#FFA500"/>
+                    <Button Content="Bishop" Margin="5" Padding="5" Background="#ADFF2F"/>
+                    <Button Content="Knight" Margin="5" Padding="5" Background="#87CEEB"/>
+                    <Button Content="Pawn" Margin="5" Padding="5" Background="Beige"/>
+
+                </StackPanel>
+
+            </Border>
+        </Grid>
+
 
         <StackPanel Grid.Column="1" Margin="10" Background="#EEE" x:Name="ControlPanel">
             

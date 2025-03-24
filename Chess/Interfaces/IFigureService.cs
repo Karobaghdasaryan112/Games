@@ -8,9 +8,9 @@ namespace Chess.Interfaces
     public interface IFigureService
     {
 
-        void FigureCut(BoardBlock cuttingBoardblock, BoardBlock cuttedBoardblock, Grid boardGrid);
+        Task FigureCut(BoardBlock cuttingBoardblock, BoardBlock cuttedBoardblock, Grid boardGrid);
 
-        bool FigureMove(BoardBlock figureBoardBlock, BoardBlock moveBoardBlock, Grid boardGrid);
+        Task<bool> FigureMove(BoardBlock figureBoardBlock, BoardBlock moveBoardBlock, Grid boardGrid);
 
         void ReInitializeFiguresAndEmptiBoardBlocks(BoardBlock figureBoardBlock, BoardBlock moveBoardBlock,Image setImage,IFigure setNewFigure);
 

@@ -23,10 +23,10 @@ namespace Chess.Services
         public static bool IsPawnCastling = false;
         public IAnimationService _animationService;
         private List<IFigure> AllBoardBlocksOfFigure = new List<IFigure>();
-        public static Grid CastlingGrid;
-        public static Grid boardGrid;
-        public static BoardBlock pawnBoardBlock;
-        public static BoardBlock emptyOrCuttedBoardBlock;
+        public static Grid? CastlingGrid;
+        public static Grid? boardGrid;
+        public static BoardBlock? pawnBoardBlock;
+        public static BoardBlock? emptyOrCuttedBoardBlock;
         public static Color castlingFigureColor;
         public FigureService(IAnimationService animationService)
         {

@@ -183,7 +183,7 @@ namespace Chess.Services
 
                                 BoardService.TurnSwitch();
 
-                                if (CheckedKing != null && !BoardService.WrongCheckedKing)
+                                if (CheckedKing != null && BoardService.WrongCheckedKing)
                                     await _animatonService.AnimateCell(CheckedKing, BoardBlock.CHECKED_COLOR, BoardBlock.MOUSE_ENTER_OPACITY, BoardBlock.MOUSE_ENTER_RECTANGLE_RADIUS);
 
                             }

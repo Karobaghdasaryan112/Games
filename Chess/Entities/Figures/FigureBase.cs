@@ -72,27 +72,6 @@ namespace Chess.Entities.Figures
             _color = color;
         }
 
-        //protected string GetPath(string FigureName, Enums.Color color)
-        //{
-        //    string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-
-        //    string projectDirectory = Directory.GetParent(
-        //        Directory.GetParent(
-        //            Directory.GetParent(
-        //                Directory.GetParent(currentDirectory).FullName)
-        //            .FullName)
-        //        .FullName)
-        //        .FullName;
-
-
-        //    string imagesDirectory = System.IO.Path.Combine(projectDirectory, "PNGs", "FigurePNGs");
-
-        //    string FigurePng = $"{FigureName}{color}.png";
-
-        //    string imagePath = System.IO.Path.Combine(imagesDirectory, $"{FigurePng}");
-
-        //    return imagePath;
-        //}
 
         protected string GetPath(string FigureName, Enums.Color color)
         {

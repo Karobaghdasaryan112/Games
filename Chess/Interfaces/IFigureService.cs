@@ -1,5 +1,6 @@
 ﻿using Chess.Entities;
 using Chess.Enums;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Shapes;
 
@@ -25,5 +26,7 @@ namespace Chess.Interfaces
         List<BoardBlock[]> CastlingMoveAnimation(Grid boardGrid);
 
         void CastlingLogic(List<BoardBlock[]> listOfBoardBlocks, BoardBlock clickedBoardBlock, Grid boardGrid);
+
+        Task ClickHandler(object sender, RoutedEventArgs e, Grid CastlingGrid, Grid boardGrid, BoardBlock pawnBoardBlock, BoardBlock emptyOrCuttedBoardBlock, Color FigureColor);
     }
 }

@@ -23,6 +23,11 @@ namespace Chess.Services
         public static bool IsPawnCastling = false;
         public IAnimationService _animationService;
         private List<IFigure> AllBoardBlocksOfFigure = new List<IFigure>();
+        public static Grid CastlingGrid;
+        public static Grid boardGrid;
+        public static BoardBlock pawnBoardBlock;
+        public static BoardBlock emptyOrCuttedBoardBlock;
+        public static Color castlingFigureColor;
         public FigureService(IAnimationService animationService)
         {
             _animationService = animationService;
@@ -457,138 +462,132 @@ namespace Chess.Services
                 || (Position.GetVerticalOrientation() == VerticalOrientation.a && pawnBoardBlock.Figure.GetColor() == Enums.Color.Black))
             {
                 var Main = MainWindow.GetWindow(boardGrid);
-                var CastlingGrid = Main.FindName("CastlingGrid") as Grid;
-                var FigureColor = pawnBoardBlock.Figure.GetColor();
+                FigureService.CastlingGrid = Main.FindName("CastlingGrid") as Grid;
+                FigureService.castlingFigureColor = pawnBoardBlock.Figure.GetColor();
 
-                CastlingGrid.Visibility = Visibility.Visible;
+                FigureService.CastlingGrid.Visibility = Visibility.Visible;
                 boardGrid.Opacity = 0.5;
                 boardGrid.IsHitTestVisible = false;
+                FigureService.boardGrid = boardGrid;
+                FigureService.pawnBoardBlock = pawnBoardBlock;
+                FigureService.emptyOrCuttedBoardBlock = emptyOrCuttedBoardBlock;
 
                 var buttons = CastlingGrid.Children
                     .OfType<Border>()
                     .FirstOrDefault()?
                     .Child as StackPanel;
+            }
+        }
 
-                if (buttons != null)
+        public async Task ClickHandler(object sender, RoutedEventArgs e, Grid CastlingGrid, Grid boardGrid, BoardBlock pawnBoardBlock, BoardBlock emptyOrCuttedBoardBlock, Color FigureColor)
+        {
+            IFigure CastlingFigure = default;
+
+            var Button = sender as Button;
+
+            if (Button != null)
+            {
+                foreach (var Figure in AllBoardBlocksOfFigure)
                 {
-                    await Task.Delay(0);
-                    var buttonList = buttons.Children.OfType<Button>();
-                    IFigure CastlingFigure = default;
-                    foreach (var Button in buttonList)
+                    if (Button.Content.ToString() == Figure.GetType().Name && Figure.GetColor() == FigureColor)
                     {
-                        Button.Click += async (s, e) =>
-                        {
-                            var clickedButton = s as Button;
-                            if (clickedButton != null)
-                            {
-                                foreach (var Figure in AllBoardBlocksOfFigure)
-                                {
-                                    if (Button.Content.ToString() == Figure.GetType().Name && Figure.GetColor() == FigureColor)
-                                    {
-                                        CastlingFigure = (IFigure)Activator.CreateInstance(Figure.GetType(), FigureColor);
-                                        CastlingFigure.Initialize();
-                                    }
-                                }
-                                if (CastlingFigure == null)
-                                    return;
-
-                                var realPawnBoardCastle = BoardService.BoardBlocks.GetElement(pawnBoardBlock.Position);
-
-                                var newBoardblock = (ICloneable)realPawnBoardCastle.Clone();
-
-                                Grid cellContainer = new Grid();
-                                Rectangle RectangleForAnimation = new Rectangle()
-                                {
-                                    Stroke = System.Windows.Media.Brushes.Black,
-                                    StrokeThickness = 1.0,
-                                    Opacity = 1.0,
-                                    Fill = ((BoardBlock)newBoardblock).ActualColor
-                                };
-
-                                BoardBlock newBoardBlockWithFigure = new BoardBlock()
-                                {
-                                    RectangleGrid = cellContainer,
-                                    RectangleForAnimation = RectangleForAnimation,
-                                    ActualColor = ((BoardBlock)newBoardblock).ActualColor,
-                                    Position = new Position(((BoardBlock)newBoardblock).Position.GetVerticalOrientation(), ((BoardBlock)newBoardblock).Position.GetHorizontalOrientation()),
-                                    Figure = CastlingFigure,
-                                    FigureImage = CastlingFigure.GetImage()
-                                };
-
-
-                                var existingCell = boardGrid.Children
-                                    .OfType<Grid>()
-                                    .FirstOrDefault(g => Grid.GetRow(g) == (int)((BoardBlock)newBoardblock).Position.GetVerticalOrientation() &&
-                                                         Grid.GetColumn(g) == (int)((BoardBlock)newBoardblock).Position.GetHorizontalOrientation());
-
-                                if (existingCell != null)
-                                    boardGrid.Children.Remove(existingCell);
-
-                                if (((BoardBlock)newBoardblock).Figure?.GetImage() != null)
-                                {
-                                    if (!cellContainer.Children.OfType<Image>().Any())
-                                    {
-                                        var newImage = new Image() { Source = CastlingFigure.GetImage().Source };
-                                        Panel.SetZIndex(newImage, 1);
-                                        cellContainer.Children.Add(newImage);
-                                    }
-                                }
-                                else
-                                {
-                                    if (!cellContainer.Children.OfType<Image>().Any())
-                                        cellContainer.Children.Add(new Image());
-                                }
-
-                                cellContainer.Children.Add(RectangleForAnimation);
-
-                                Panel.SetZIndex(RectangleForAnimation, 0);
-
-                                Grid.SetRow(cellContainer, (int)((BoardBlock)newBoardblock).Position.GetVerticalOrientation());
-                                Grid.SetColumn(cellContainer, (int)((BoardBlock)newBoardblock).Position.GetHorizontalOrientation());
-
-                                boardGrid.Children.Add(cellContainer);
-
-                                BoardService.BoardBlocks.Remove(realPawnBoardCastle);
-                                BoardService.BoardBlocks.Add(newBoardBlockWithFigure);
-
-                                IFigureService figureService = new FigureService(_animationService);
-                                BoardBlockService boardBlockService = new BoardBlockService(_animationService, figureService);
-
-                                newBoardBlockWithFigure.RectangleForAnimation.MouseLeftButtonUp += async (s, e) => { e.Handled = true; await boardBlockService.SetEmptyBoardAnimations(newBoardBlockWithFigure, boardGrid); };
-
-                                if (newBoardBlockWithFigure.Figure != null)
-                                {
-                                    cellContainer.Children.OfType<Image>().First().MouseLeftButtonUp += async (s, e) =>
-                                    {
-                                        e.Handled = true;
-                                        await boardBlockService.SetFigureAnimations(
-                                            boardGrid,
-                                            newBoardBlockWithFigure.Position.GetVerticalOrientation(),
-                                            newBoardBlockWithFigure.Position.GetHorizontalOrientation(),
-                                            newBoardBlockWithFigure.Figure,
-                                            newBoardBlockWithFigure.RectangleGrid,
-                                            newBoardBlockWithFigure);
-                                    };
-
-
-                                    cellContainer.Children.OfType<Image>().First().MouseEnter += (s, e) => newBoardBlockWithFigure.RectangleForAnimation?.RaiseEvent(new MouseEventArgs(Mouse.PrimaryDevice, 0) { RoutedEvent = UIElement.MouseEnterEvent });
-                                    cellContainer.Children.OfType<Image>().First().MouseLeave += (s, e) => newBoardBlockWithFigure.RectangleForAnimation?.RaiseEvent(new MouseEventArgs(Mouse.PrimaryDevice, 0) { RoutedEvent = UIElement.MouseLeaveEvent });
-                                }
-                                else
-                                {
-                                    newBoardBlockWithFigure.RectangleForAnimation.MouseLeftButtonUp += async (s, e) => { e.Handled = true; await boardBlockService.SetEmptyBoardAnimations(newBoardBlockWithFigure, boardGrid); };
-                                }
-
-                                boardBlockService.SetMouseLeaveAndEnterAnimations(newBoardBlockWithFigure);
-                                await boardBlockService.IsKingCheckedForeMove(boardGrid, newBoardBlockWithFigure, emptyOrCuttedBoardBlock);
-                                CastlingGrid.Visibility = Visibility.Hidden;
-                                boardGrid.IsHitTestVisible = true;
-                                boardGrid.Opacity = 1;
-
-                            }
-                        };
+                        CastlingFigure = (IFigure)Activator.CreateInstance(Figure.GetType(), FigureColor);
+                        CastlingFigure.Initialize();
                     }
                 }
+
+                if (CastlingFigure == null)
+                    return;
+
+                var realPawnBoardCastle = BoardService.BoardBlocks.GetElement(pawnBoardBlock.Position);
+
+                var newBoardblock = (ICloneable)realPawnBoardCastle.Clone();
+
+                Grid cellContainer = new Grid();
+                Rectangle RectangleForAnimation = new Rectangle()
+                {
+                    Stroke = System.Windows.Media.Brushes.Black,
+                    StrokeThickness = 1.0,
+                    Opacity = 1.0,
+                    Fill = ((BoardBlock)newBoardblock).ActualColor
+                };
+
+                BoardBlock newBoardBlockWithFigure = new BoardBlock()
+                {
+                    RectangleGrid = cellContainer,
+                    RectangleForAnimation = RectangleForAnimation,
+                    ActualColor = ((BoardBlock)newBoardblock).ActualColor,
+                    Position = new Position(((BoardBlock)newBoardblock).Position.GetVerticalOrientation(), ((BoardBlock)newBoardblock).Position.GetHorizontalOrientation()),
+                    Figure = CastlingFigure,
+                    FigureImage = CastlingFigure.GetImage()
+                };
+
+                var existingCell = boardGrid.Children
+                    .OfType<Grid>()
+                    .FirstOrDefault(g => Grid.GetRow(g) == (int)((BoardBlock)newBoardblock).Position.GetVerticalOrientation() &&
+                                         Grid.GetColumn(g) == (int)((BoardBlock)newBoardblock).Position.GetHorizontalOrientation());
+
+                if (existingCell != null)
+                    boardGrid.Children.Remove(existingCell);
+
+                if (((BoardBlock)newBoardblock).Figure?.GetImage() != null)
+                {
+                    if (!cellContainer.Children.OfType<Image>().Any())
+                    {
+                        var newImage = new Image() { Source = CastlingFigure.GetImage().Source };
+                        Panel.SetZIndex(newImage, 1);
+                        cellContainer.Children.Add(newImage);
+                    }
+                }
+                else
+                {
+                    if (!cellContainer.Children.OfType<Image>().Any())
+                        cellContainer.Children.Add(new Image());
+                }
+
+                cellContainer.Children.Add(RectangleForAnimation);
+
+                Panel.SetZIndex(RectangleForAnimation, 0);
+
+                Grid.SetRow(cellContainer, (int)((BoardBlock)newBoardblock).Position.GetVerticalOrientation());
+                Grid.SetColumn(cellContainer, (int)((BoardBlock)newBoardblock).Position.GetHorizontalOrientation());
+
+                boardGrid.Children.Add(cellContainer);
+
+                BoardService.BoardBlocks.Remove(realPawnBoardCastle);
+                BoardService.BoardBlocks.Add(newBoardBlockWithFigure);
+
+                IFigureService figureService = new FigureService(_animationService);
+                BoardBlockService boardBlockService = new BoardBlockService(_animationService, figureService);
+
+                newBoardBlockWithFigure.RectangleForAnimation.MouseLeftButtonUp += async (s, e) => { e.Handled = true; await boardBlockService.SetEmptyBoardAnimations(newBoardBlockWithFigure, boardGrid); };
+
+                if (newBoardBlockWithFigure.Figure != null)
+                {
+                    cellContainer.Children.OfType<Image>().First().MouseLeftButtonUp += async (s, e) =>
+                    {
+                        e.Handled = true;
+                        await boardBlockService.SetFigureAnimations(
+                            boardGrid,
+                            newBoardBlockWithFigure.Position.GetVerticalOrientation(),
+                            newBoardBlockWithFigure.Position.GetHorizontalOrientation(),
+                            newBoardBlockWithFigure.Figure,
+                            newBoardBlockWithFigure.RectangleGrid,
+                            newBoardBlockWithFigure);
+                    };
+
+
+                    cellContainer.Children.OfType<Image>().First().MouseEnter += (s, e) => newBoardBlockWithFigure.RectangleForAnimation?.RaiseEvent(new MouseEventArgs(Mouse.PrimaryDevice, 0) { RoutedEvent = UIElement.MouseEnterEvent });
+                    cellContainer.Children.OfType<Image>().First().MouseLeave += (s, e) => newBoardBlockWithFigure.RectangleForAnimation?.RaiseEvent(new MouseEventArgs(Mouse.PrimaryDevice, 0) { RoutedEvent = UIElement.MouseLeaveEvent });
+                }
+                else
+                    newBoardBlockWithFigure.RectangleForAnimation.MouseLeftButtonUp += async (s, e) => { e.Handled = true; await boardBlockService.SetEmptyBoardAnimations(newBoardBlockWithFigure, boardGrid); };
+                
+                boardBlockService.SetMouseLeaveAndEnterAnimations(newBoardBlockWithFigure);
+                await boardBlockService.IsKingCheckedForeMove(boardGrid, newBoardBlockWithFigure, emptyOrCuttedBoardBlock);
+                CastlingGrid.Visibility = Visibility.Hidden;
+                boardGrid.IsHitTestVisible = true;
+                boardGrid.Opacity = 1;
             }
         }
     }

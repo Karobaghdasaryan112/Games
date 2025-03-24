@@ -36,12 +36,11 @@
                         </TextBlock>
                     </Border>
 
-                    <Button Content="Queen" Margin="5" Padding="5" Background="#FFD700"/>
-                    <Button Content="Rook" Margin="5" Padding="5" Background="#FFA500"/>
-                    <Button Content="Bishop" Margin="5" Padding="5" Background="#ADFF2F"/>
-                    <Button Content="Knight" Margin="5" Padding="5" Background="#87CEEB"/>
-                    <Button Content="Pawn" Margin="5" Padding="5" Background="Beige"/>
-
+                        <Button Content="Queen" Margin="5" Padding="5" Background="#FFD700" Click="OnQueenClick"/>
+                        <Button Content="Rook" Margin="5" Padding="5" Background="#FFA500" Click="OnRookClick"/>
+                        <Button Content="Bishop" Margin="5" Padding="5" Background="#ADFF2F" Click="OnBishopClick"/>
+                        <Button Content="Knight" Margin="5" Padding="5" Background="#87CEEB" Click="OnKnightClick"/>
+                        <Button Content="Pawn" Margin="5" Padding="5" Background="Beige" Click="OnPawnClick"/>
                 </StackPanel>
 
             </Border>

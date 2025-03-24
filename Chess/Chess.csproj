@@ -9,6 +9,60 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="PNGs\FigurePNGs\BishopBlack.png" />
+    <None Remove="PNGs\FigurePNGs\BishopWhite.png" />
+    <None Remove="PNGs\FigurePNGs\KingBlack.png" />
+    <None Remove="PNGs\FigurePNGs\KingWhite.png" />
+    <None Remove="PNGs\FigurePNGs\KnightBlack.png" />
+    <None Remove="PNGs\FigurePNGs\KnightWhite.png" />
+    <None Remove="PNGs\FigurePNGs\PawnBlack.png" />
+    <None Remove="PNGs\FigurePNGs\PawnWhite.png" />
+    <None Remove="PNGs\FigurePNGs\QueenBlack.png" />
+    <None Remove="PNGs\FigurePNGs\QueenWhite.png" />
+    <None Remove="PNGs\FigurePNGs\RookBlack.png" />
+    <None Remove="PNGs\FigurePNGs\RookWhite.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="PNGs\FigurePNGs\BishopBlack.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PNGs\FigurePNGs\BishopWhite.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PNGs\FigurePNGs\KingBlack.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PNGs\FigurePNGs\KingWhite.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PNGs\FigurePNGs\KnightBlack.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PNGs\FigurePNGs\KnightWhite.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PNGs\FigurePNGs\PawnBlack.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PNGs\FigurePNGs\PawnWhite.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PNGs\FigurePNGs\QueenBlack.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PNGs\FigurePNGs\QueenWhite.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PNGs\FigurePNGs\RookBlack.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PNGs\FigurePNGs\RookWhite.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Data\" />
     <Folder Include="Exceptions\" />
   </ItemGroup>

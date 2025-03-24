@@ -23,5 +23,30 @@ namespace Chess
             _boardService = new BoardService(_boardBlockService);
             _boardService.BoardInitialize(BoardGrid, BOARD_SIZE);
         }
+
+        public async void OnQueenClick(object sender, RoutedEventArgs e)
+        {
+            await _figureService.ClickHandler(sender, e, FigureService.CastlingGrid, FigureService.boardGrid, FigureService.pawnBoardBlock, FigureService.emptyOrCuttedBoardBlock, FigureService.castlingFigureColor);
+        }
+
+        public async void OnRookClick(object sender, RoutedEventArgs e)
+        {
+            await _figureService.ClickHandler(sender, e, FigureService.CastlingGrid, FigureService.boardGrid, FigureService.pawnBoardBlock, FigureService.emptyOrCuttedBoardBlock, FigureService.castlingFigureColor);
+        }
+
+        public async void OnBishopClick(object sender, RoutedEventArgs e)
+        {
+            await _figureService.ClickHandler(sender, e, FigureService.CastlingGrid, FigureService.boardGrid, FigureService.pawnBoardBlock, FigureService.emptyOrCuttedBoardBlock, FigureService.castlingFigureColor);
+        }
+
+        public async void OnKnightClick(object sender, RoutedEventArgs e)
+        {
+            await _figureService.ClickHandler(sender, e, FigureService.CastlingGrid, FigureService.boardGrid, FigureService.pawnBoardBlock, FigureService.emptyOrCuttedBoardBlock, FigureService.castlingFigureColor);
+        }
+
+        public async void OnPawnClick(object sender, RoutedEventArgs e)
+        {
+            await _figureService.ClickHandler(sender, e, FigureService.CastlingGrid, FigureService.boardGrid, FigureService.pawnBoardBlock, FigureService.emptyOrCuttedBoardBlock, FigureService.castlingFigureColor);
+        }
     }
 }

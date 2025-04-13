@@ -9,9 +9,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Interfaces\" />
-    <Folder Include="Extentions\" />
-    <Folder Include="Services\" />
+    <None Remove="PNGs\FigurePNGs\BlackFigure.png" />
+    <None Remove="PNGs\FigurePNGs\WhiteFigure.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="PNGs\FigurePNGs\WhiteFigure.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PNGs\FigurePNGs\BlackFigure.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

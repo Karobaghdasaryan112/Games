@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace Checkers.Enums
 {
-    internal class Turn
+    public enum Turn
     {
+        White,
+        Black
     }
 }

@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace Checkers.Enums
 {
-    internal class Color
+    public enum Color
     {
+        None,
+        White,
+        Black
     }
 }

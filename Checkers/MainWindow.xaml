@@ -5,8 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Checkers"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="800" Width="800">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
 
+            <ColumnDefinition Width="0*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid x:Name="BoardGrid" Grid.Column="0"
+              Margin="10"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch"
+              Background="Beige">
+        </Grid>
     </Grid>
 </Window>

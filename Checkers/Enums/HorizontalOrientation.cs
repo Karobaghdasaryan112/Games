@@ -1,12 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Checkers.Enums
 {
-    internal class HorizontalOrientation
+    public enum HorizontalOrientation
     {
+        //ajic dzax
+        position0,
+        position1,
+        position2,
+        position3,
+        position4,
+        position5,
+        position6,
+        position7
     }
 }

@@ -1,12 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
 namespace Checkers.Enums
 {
-    internal class VerticalOrientation
+    public enum VerticalOrientation
     {
+        //verevic nerqev
+        a,
+        b,
+        c,
+        d,
+        e,
+        f,
+        g,
+        h
     }
 }

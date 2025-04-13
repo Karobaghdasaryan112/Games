@@ -28,6 +28,7 @@ namespace Chess.Services
         public static BoardBlock? pawnBoardBlock;
         public static BoardBlock? emptyOrCuttedBoardBlock;
         public static Color castlingFigureColor;
+
         public FigureService(IAnimationService animationService)
         {
             _animationService = animationService;
@@ -45,6 +46,7 @@ namespace Chess.Services
             foreach (var item in AllBoardBlocksOfFigure)
                 item.Initialize();
         }
+
 
         public async Task FigureCut(BoardBlock cuttingBoardblock, BoardBlock cuttedBoardblock, Grid boardGrid)
         {
@@ -151,6 +153,7 @@ namespace Chess.Services
 
         private async Task CheckedLogic(Enums.Color color, BoardBlock KingBoardBlock, VerticalOrientation verticalOrientation, HorizontalOrientation horizontalOrientation)
         {
+           
             BoardService.AttackedFigureOnKing.Clear();
 
             if (
@@ -284,17 +287,23 @@ namespace Chess.Services
                         continue;
                     block2.RectangleForAnimation.Fill = BoardBlock.EVENT_COLOR;
                     BoardService.BoardPaintedToMoveBlocks.Add(block2);
+                    //await SimulationforVirtualCuttingAndMovingFigures(block2, 300);
                     await FigureMove(block1, block2, boardGrid);
+                    //await SimulationforVirtualCuttingAndMovingFigures(block2, 300);
                     BoardService.BoardPaintedToMoveBlocks.Clear();
 
                     if (!await IsKingCheckedCondition())
                     {
+                        //await SimulationforVirtualCuttingAndMovingFigures(block2, 300);
                         VirtualFigureMoving(block1, block2, boardGrid);
+                        //await SimulationforVirtualCuttingAndMovingFigures(block2, 300);
                         return true;
                     }
                     if (block2 != null)
                     {
+                        //await SimulationforVirtualCuttingAndMovingFigures(block2, 300);
                         VirtualFigureMoving(block1, block2, boardGrid);
+                        //await SimulationforVirtualCuttingAndMovingFigures(block2, 300);
                     }
                     CutAndMoveBlocks = tryingBoardBlocks[baseIndex].Figure.MovableBlocks(tryingBoardBlocks[baseIndex].Position.GetVerticalOrientation(), tryingBoardBlocks[baseIndex].Position.GetHorizontalOrientation(), figureColor);
                     MoveBlocks = CutAndMoveBlocks[0];
@@ -318,7 +327,9 @@ namespace Chess.Services
                         VirtualFigureCuting(block1, block2, newCuttedBlock, boardGrid);
                         return true;
                     }
+                    //await SimulationforVirtualCuttingAndMovingFigures(block2, 300);
                     VirtualFigureCuting(block1, block2, newCuttedBlock, boardGrid);
+                    //await SimulationforVirtualCuttingAndMovingFigures(block2, 300);
                     CutAndMoveBlocks = tryingBoardBlocks[baseIndex].Figure.MovableBlocks(tryingBoardBlocks[baseIndex].Position.GetVerticalOrientation(), tryingBoardBlocks[baseIndex].Position.GetHorizontalOrientation(), figureColor);
                     CutBlocks = CutAndMoveBlocks[1];
                 }
@@ -439,14 +450,14 @@ namespace Chess.Services
             IBoardService boardService = new BoardService(boardBlockService);
             boardService.BoardInitialize(boardGrid, BOARD_SIZE);
         }
-        private async Task SimulationforVirtualCuttingAndMovingFigures(BoardBlock block, double dimmedOpacity)
-        {
-            if (block == null) return;
-            double initialOpacity = block.RectangleForAnimation.Opacity;
-            await _animationService.AnimateOpacity(block, dimmedOpacity, 300);
-            await Task.Delay(200);
-            await _animationService.AnimateOpacity(block, initialOpacity, 300);
-        }
+        //private async Task SimulationforVirtualCuttingAndMovingFigures(BoardBlock block, double dimmedOpacity)
+        //{
+        //    if (block == null) return;
+        //    double initialOpacity = block.RectangleForAnimation.Opacity;
+        //    await _animationService.AnimateOpacity(block, dimmedOpacity, 300);
+        //    await Task.Delay(200);
+        //    await _animationService.AnimateOpacity(block, initialOpacity, 300);
+        //}
 
         public async Task PawnCastling(BoardBlock pawnBoardBlock, BoardBlock emptyOrCuttedBoardBlock, Grid boardGrid)
         {
